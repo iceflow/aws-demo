@@ -1,0 +1,153 @@
+
+select * from pg_namespace;
+
+select distinct(tablename) from pg_table_def where schemaname = 'ods';
+
+select * from public.user;
+
+select * from pg_user;
+
+select current_schema();
+
+create function f_merge (name varchar, password varchar)
+  returns varchar
+stable
+as $$
+  return name+"+"+password
+$$ language plpythonu;
+
+create function args (name varchar, password varchar)
+  returns varchar
+stable
+as $$
+  return name+"+"+password
+$$ language plpythonu;
+
+select f_merge(name,password) from public.user;
+
+create user danny with password 'abcD1234';
+
+create group dc_user with user danny;
+
+grant select on table public.user to group dc_user;
+
+revoke select on table public.user from group dc_user;
+
+revoke EXECUTE from PUBLIC;
+
+select * from pg_namespace;
+select * from pg_table;
+select distinct(tablename) from pg_table_def where schemaname = 'ods';
+
+create schema if not exists ods;
+create schema if not exists ods1;
+create schema ods;
+DROP TABLE ods.user;
+CREATE TABLE ods.user
+(
+   name varchar(50),
+   password varchar(50)
+);
+copy ods.user from 's3://leo.emr/logs/test.log' 
+credentials 'aws_access_key_id=xxx;aws_secret_access_key=xxx' 
+delimiter ',';
+
+select * from ods.user;
+
+select f_merge(name,password) from ods.user;
+
+desc ods.user;
+
+select tablename, 
+   HAS_TABLE_PRIVILEGE(tablename, 'select') as select,
+   HAS_TABLE_PRIVILEGE(tablename, 'insert') as insert,
+   HAS_TABLE_PRIVILEGE(tablename, 'update') as update,
+   HAS_TABLE_PRIVILEGE(tablename, 'delete') as delete, 
+   HAS_TABLE_PRIVILEGE(tablename, 'references') as references 
+from pg_tables where schemaname='ods' order by tablename;
+
+select * from ods.user;
+
+
+
+
+select * from pg_namespace;
+select * from pg_tables;
+
+select * from pg_group;
+select * from pg_user;
+
+grant select,update,insert,delete,rule,references,trigger on ods.user to group dc_user;
+
+grant select,update,insert,delete,rule,references,trigger on ALL TABLES IN SCHEMA ods to group dc_user;
+
+grant all privileges on ALL TABLES IN SCHEMA ods to danny;
+
+grant all privileges on schema ods to group dc_user;
+revoke all privileges on schema ods from group dc_user;
+
+revoke all privileges on schema ods from danny;
+
+select PG_BACKEND_PID();
+
+show all;
+show query_group ;
+COMMIT;
+
+select * from pg_namespace;
+
+select 
+'grant ' || substring(
+          case when charindex('U',split_part(split_part(array_to_string(nspacl, '|'),pu.usename,2 ) ,'/',1)) > 0 then ',usage ' else '' end 
+          ||case when charindex('C',split_part(split_part(array_to_string(nspacl, '|'),pu.usename,2 ) ,'/',1)) > 0 then ',create ' else '' end 
+       , 2,10000)
+|| ' on schema '||nspname||' to "'||pu.usename||'";' 
+from pg_namespace pn,pg_user pu
+ where  array_to_string(nspacl,',') like '%'||pu.usename||'%' --and pu.usename='<username>' 
+and nspowner > 1 
+union
+select 
+'grant ' || substring(
+          case when charindex('U',split_part(split_part(array_to_string(nspacl, '|'),pg.groname,2 ) ,'/',1)) > 0 then ',usage ' else '' end 
+          ||case when charindex('C',split_part(split_part(array_to_string(nspacl, '|'),pg.groname,2 ) ,'/',1)) > 0 then ',create ' else '' end 
+       , 2,10000)
+|| ' on schema '||nspname||' to group "'||pg.groname||'";' 
+from pg_namespace pn,pg_group pg
+ where array_to_string(nspacl,',') like '%'||pg.groname||'%' --and pg.groname='<username>' 
+ and nspowner > 1 ;
+ 
+
+select lanname,lanacl from pg_language where lanname = 'plpythonu';
+
+SELECT proname,proacl FROM pg_proc WHERE proname='f_merge';
+
+select * from pg_proc where proname='args';
+drop function args(varchar,varchar);
+
+SELECT proname,proacl FROM pg_proc WHERE proname='f_merge';
+
+select * from pg_proc where proname ilike '%args%';
+
+select * from pg_language;
+select * from pg_proc ;
+
+select lanname,lanacl from pg_language;
+
+drop function args(name,password);
+
+CREATE  FUNCTION args
+(  val varchar,start varchar  )
+RETURNS varchar
+IMMUTABLE AS $$
+get_args = lambda val, start:filter(lambda x:x.startswith(start), val.split('|'))[0].split(':')[1] if filter(lambda x:x.startswith(start), val.split('|')) else ''
+return get_args(val, start)
+$$ LANGUAGE plpythonu;
+
+desc pg_language;
+
+select current_database();
+show search_path;
+select current_schema();
+select current_user;
+
+SELECT proname,nspname, proacl FROM pg_proc, pg_namespace WHERE pg_proc.pronamespace=pg_namespace.oid;

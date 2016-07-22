@@ -1,0 +1,8 @@
+#!/bin/bash
+
+ENDPOINT=sample-db.c32ga4xm3cfp.us-east-1.redshift.amazonaws.com
+USERID=danny
+DB=sampledb
+PORT=5439
+
+psql -h ${ENDPOINT} -U ${USERID} -d $DB -p $PORT

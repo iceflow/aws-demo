@@ -1,0 +1,53 @@
+elect * from public.user;
+
+select * from pg_user;
+
+select f_merge(name,password) from public.user;
+
+select f_merge(name,password) from ods.user;
+select args(name,password) from ods.user;
+
+
+select * from ods.user;
+
+set search_path to ods;
+show search_path;
+select tablename, 
+   HAS_TABLE_PRIVILEGE(tablename, 'select') as select,
+   HAS_TABLE_PRIVILEGE(tablename, 'insert') as insert,
+   HAS_TABLE_PRIVILEGE(tablename, 'update') as update,
+   HAS_TABLE_PRIVILEGE(tablename, 'delete') as delete, 
+   HAS_TABLE_PRIVILEGE(tablename, 'references') as references 
+from pg_tables where schemaname='ods' order by tablename;
+
+
+
+select * from pg_tables where schemaname='ods';
+desc ods.user;
+
+SELECT proname,proacl FROM pg_proc WHERE proname='f_merge';
+
+use ods;
+select HAS_TABLE_PRIVILEGE('ods.user', 'select');
+
+select HAS_TABLE_PRIVILEGE('user', 'select');
+
+select current_database();
+
+select has_schema_privilege('ods', 'usage');
+
+select has_schema_privilege('public', 'create');
+
+select has_schema_privilege('ods1', 'usage');
+
+select PG_BACKEND_PID();
+
+show search_path;
+
+select current_database();
+show search_path;
+select current_schema();
+select current_user;
+
+COMMIT;
+

@@ -1,0 +1,4 @@
+jdbc:redshift://sample-db.c32ga4xm3cfp.us-east-1.redshift.amazonaws.com:5439/sampledb
+test/F9
+
+create user danny with password 'abcD1234';

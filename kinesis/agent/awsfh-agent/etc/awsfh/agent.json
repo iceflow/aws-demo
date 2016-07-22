@@ -1,0 +1,29 @@
+{
+  /*
+   * Flag for emitting Cloudwatch Metrics. Set to false if you don't want this
+   *  agent to send metrics to Cloudwatch.
+   * NOTE: Emitting metrics to Cloudwatch could incur extra costs on your AWS
+   *  account.
+   */
+  "cloudwatch.emitMetrics": true,
+  "kinesis.endpoint": "",
+  
+  "flows": [
+    {
+      /*
+       * A glob of the files that need to be watched by this agent.
+       * Any file that matches this pattern will be candidate for tailing.
+       * The agent will keep watching files that match this glob and whenever
+       *  a new file shows up it will be picked up and consumed.
+       */
+      "filePattern": "/var/log/messages*",
+      "kinesisStream": "yourstream",
+      /*
+       * Options for generating partition key, set to RANDOM by default:
+       *   - RANDOM: partition key will be a randomly generated integer
+       *   - DETERMINISTIC: partition key will be the hash value computed from the data
+       */
+      "partitionKeyOption": "RANDOM"
+    }
+  ]
+}

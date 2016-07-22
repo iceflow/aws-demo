@@ -1,0 +1,219 @@
+#! /usr/bin/env python
+
+from __future__ import print_function
+from datetime import datetime, timedelta
+import socket, os
+from fcntl import flock
+import sys
+import math
+import string
+import random
+import time
+import traceback
+
+random_char_set = string.ascii_uppercase + string.digits + " -_=.,!~`"
+start_time = int(time.time())
+seq_number = 0
+process_id = os.getpid()
+hostname = socket.gethostname()
+stats = {'bytes': 0, 'records': 0}
+
+def log(args, msg):
+    print("%s\t%s\t%s" % (datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f"), args.filename, msg), file=sys.stderr)
+
+def verbose_log(args, msg):
+    if(args.verbose):
+        log(args, msg)
+
+def get_random_string(size):
+    global random_char_set
+    return ''.join(random.sample(random_char_set*size, size))
+
+def get_record(args):
+    global start_time, seq_number, process_id, hostname
+    seq_number += 1
+    target_length = int(random.uniform(args.average_record_size_bytes * 0.5, args.average_record_size_bytes * 1.5))
+    record = "SEQ=%010d-%06d\t%s\t%s\tFILE=%s" % (
+                                       seq_number,
+                                       process_id,
+                                       datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f"),
+                                       hostname,
+                                       args.filename
+                                       )
+    delta = target_length - len(record)
+    if delta > 1:
+        record += "\t" + get_random_string(delta)
+    return record
+
+def rotate_file(file, from_index, to_index, args):
+    f1 = file if from_index == None else "%s.%d" % (file, from_index)
+    f2 = "%s.%d" % (file, to_index)
+    if os.path.exists(f2):
+        if to_index >= args.rotate_keep_count:
+            os.remove(f2)
+            verbose_log(args, "Deleted file '%s'" % f2)
+        else:
+            rotate_file(file, to_index, to_index+1, args)
+    os.rename(f1, f2)
+    verbose_log(args, "Renamed file '%s' -> '%s'" % (f1, f2))
+
+def initial_throughput(args):
+    if args.target_bytes_per_second != None:
+        args.target_records_per_second = args.target_bytes_per_second / (args.average_record_size_bytes + 1)
+    args.batches_per_second = 10.0
+    args.sleep = int(round(0.90 * (1000.0 / args.batches_per_second)))
+    args.records_per_batch = int(max(1, round(args.target_records_per_second / args.batches_per_second)))
+    while args.sleep < args.min_sleep:
+        args.batches_per_second += 2
+        args.records_per_batch = int(max(1, round(args.target_records_per_second / args.batches_per_second)))
+        args.sleep = int(round(0.90 * (1000.0 / args.batches_per_second)))
+    return (args.sleep, args.records_per_batch)
+
+def adjust_throughput(args):
+    if args.target_bytes_per_second != None:
+        # target a byte rate
+        if args.throughput_bytes == 0:
+            return initial_throughput(args)
+        else:
+            records_delta = (args.target_bytes_per_second - args.throughput_bytes)/args.throughput_bytes
+    else:
+        # target a record rate
+        if args.throughput_records == 0:
+            return initial_throughput(args)
+        else:
+            records_delta = (args.target_records_per_second - args.throughput_records)/args.throughput_records
+    #verbose_log(args, "TRACE: Current records per batch = %d (%f batches/sec), Calculated delta = %f"%(args.records_per_batch, args.batches_per_second, records_delta))
+    old_records_per_batch = args.records_per_batch
+    records_delta = math.copysign(min(args.max_records_delta, abs(records_delta)), records_delta)
+    args.records_per_batch = max(1, int(round(args.records_per_batch * (1.0 + records_delta))))
+    #verbose_log(args, "TRACE: New records per batch = %d (%f batches/sec), effective delta = %f"%(args.records_per_batch, args.batches_per_second, records_delta))
+    if args.records_per_batch == old_records_per_batch:
+        # fine tune by adjusting the sleep up/down
+        if args.target_bytes_per_second != None:
+            # target a byte rate
+            target_batches_per_second = args.target_bytes_per_second / float(args.records_per_batch * args.average_record_size_bytes)
+        else:
+            # target a record rate
+            target_batches_per_second = args.target_records_per_second / float(args.records_per_batch)
+        sleep_delta = ((1000.0 / target_batches_per_second) - (1000.0 / args.batches_per_second)) / (1000.0 / args.batches_per_second)
+        #verbose_log(args, "TRACE: Current sleep = %d, Calculated delta = %f"%(args.sleep, sleep_delta))
+        sleep_delta = math.copysign(min(args.max_sleep_delta, abs(sleep_delta)), sleep_delta)
+        args.sleep = int(round(args.sleep * (1.0 + sleep_delta)))
+        args.sleep = max(args.min_sleep, args.sleep)
+        args.sleep = min(args.max_sleep, args.sleep)
+        args.batches_per_second = 1.0 / (args.sleep / 1000.0)
+        #verbose_log(args, "TRACE: New sleep = %d, effective delta = %f"%(args.sleep, sleep_delta))
+    return (args.sleep, args.records_per_batch)
+
+def generate_log_data(args):
+    report_interval = 10
+    last_report_time = time.time()
+    last_rotate_time = time.time()
+    last_stats = stats.copy()
+    adjust_throughput(args)
+    while True:
+        try:
+            records_per_batch_change = abs(args.records_per_batch - args.previous_records_per_batch)/args.previous_records_per_batch if args.previous_records_per_batch else 1
+            sleep_change = abs(args.sleep - args.previous_sleep)/args.previous_sleep if args.previous_sleep else 1
+            if records_per_batch_change >= 0.10 or sleep_change >= 0.10:
+                verbose_log(args, 'Generating batches of %s record(s) (%d bytes avg) with about %d milliseconds of sleep in between...' % (args.records_per_batch, args.average_record_size_bytes, args.sleep))
+                args.previous_records_per_batch = args.records_per_batch
+                args.previous_sleep = args.sleep
+            # open args.filename for append, with line-buffering
+            fd = open(args.filename, 'a+', 1)
+            try:
+                for counter in range(args.records_per_batch):
+                    line = get_record(args)
+                    print(line, file=fd)
+                    stats['bytes'] += len(line)
+                    stats['records'] += 1
+            finally:
+                fd.close()
+            if time.time() - last_report_time >= report_interval:
+                now = time.time()
+                duration = now - last_report_time
+                delta = {'bytes': stats['bytes'] - last_stats['bytes'],
+                         'records': stats['records'] - last_stats['records']}
+                args.throughput_bytes = delta['bytes']/duration
+                args.throughput_records = delta['records']/duration
+                # NOTE: This log line is parsed by scripts in support/benchmarking.
+                #       If it's modified the scripts need to be modified as well.
+                verbose_log(args, \
+                            "Generated %0.3f bytes / %0.3f records per second (Targets: %0.0f bytes / %0.0f records @ %d bytes average record size)" \
+                            % (args.throughput_bytes, args.throughput_records, \
+                               args.target_bytes_per_second, args.target_records_per_second, args.average_record_size_bytes))
+                last_stats = stats.copy()
+                last_report_time = now
+                # adjust the throughput
+                adjust_throughput(args)
+            if time.time() - last_rotate_time >= args.rotate_interval_seconds:
+                last_rotate_time = time.time()
+                rotate_file(args.filename, None, 1, args)
+            elif os.path.getsize(args.filename) > args.rotate_file_size_bytes:
+                last_rotate_time = time.time()
+                rotate_file(args.filename, None, 1, args)
+        except KeyboardInterrupt:
+            raise
+        except:
+              exc_type, exc_value, exc_traceback = sys.exc_info()
+              lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+              log(args, ''.join(' ' + line for line in lines))
+        if args.sleep > 0:
+            #verbose_log(args, "TRACE: Sleeping for %d milliseconds" % args.sleep)
+            time.sleep(args.sleep/1000.0)
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='Generate a rotating log file with random data. Either `--throughput-records` or `--throughput-bytes` (but not both) need to be provided to control throughput.',
+                                     add_help=True)
+    parser.add_argument("filenames", metavar="FILENAME", nargs=1,
+                   help="the file to append log records to")
+    control = parser.add_mutually_exclusive_group(required=True)
+    control.add_argument("--throughput-records", dest="target_records_per_second", type=int,
+                   help="Target throughput in records per second.")
+    control.add_argument("--throughput-bytes", dest="target_bytes_per_second", type=int,
+                   help="Target throughput in bytes per second.")
+
+    parser.add_argument("--rotate-file-size", dest="rotate_file_size_bytes", type=float, default=1024*1024*1024,
+                   help="the size, in bytes, that would trigger the log file to rotate. Default: 1GB.")
+    parser.add_argument("--rotate-interval", dest="rotate_interval_seconds", type=int, default=3600,
+                   help="the interval, in seconds, that would trigger the log file to rotate. Default: 3600 (1 hour).")
+    parser.add_argument("--rotate-keep-count", dest="rotate_keep_count", type=int, default=10,
+                   help="the number of rotated log files files to keep. When this number is reached, the oldest rotated file will be deleted. Default: 10.")
+    parser.add_argument("--average-record-size", dest="average_record_size_bytes", type=int, default=512,
+                   help="the average size, in bytes, of each log record; the actual size of individual records will vary between 50%% and 150%% of the average. Default: 250.")
+    #parser.add_argument("--lines-per-record", dest="lines_per_record", type=int, default=1,
+    #               help="the number of lines per log record")
+    parser.add_argument("--verbose", action="store_const", const=True, default=False,
+                   help="print to the console some statistics.")
+    args = parser.parse_args()
+    args.filename = args.filenames[0]
+
+    args.sleep = None
+    args.previous_sleep = None
+
+    args.records_per_batch = None
+    args.previous_records_per_batch = None
+
+    args.throughput_bytes=0
+    args.throughput_records=0
+
+    args.max_records_delta = 1.25
+    args.max_sleep_delta = 0.25
+    args.min_sleep = 10
+    args.max_sleep = 10000
+
+    def check_int_arg_range(arg_name, value, min_value, max_value):
+        if value and min_value and value < min_value:
+            parser.error("%s argument must be >= %d (%s)" % (arg_name, min_value, value) )
+        if value and max_value and value > max_value:
+            parser.error("%s argument must be <= %d (%s)" % (arg_name, max_value, value) )
+    check_int_arg_range("--throughput-records", args.target_records_per_second, 10, 1000000)
+    check_int_arg_range("--throughput-bytes", args.target_bytes_per_second, 1000, 5000000)
+    #check_int_arg_range("--lines-per-record", args.lines_per_record, 1, 50)
+    check_int_arg_range("--average-record-size", args.average_record_size_bytes, 100, 100000)
+    check_int_arg_range("--rotate-file-size", args.rotate_file_size_bytes, 1024, 2*1024*1024*1024)
+    check_int_arg_range("--rotate-interval", args.rotate_interval_seconds, 60, 24*3600)
+
+    generate_log_data(args)

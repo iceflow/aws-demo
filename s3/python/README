@@ -1,0 +1,3 @@
+
+make_index:
+	生成s3 bucket index.html文件, 视频文件下载链接自动生成　

@@ -1,0 +1,139 @@
+SQL Workbench/J connection:
+jdbc:redshift://sample-db.c32ga4xm3cfp.us-east-1.redshift.amazonaws.com:5439/sampledb
+test/F9
+
+create user danny with password 'abcD1234';
+
+
+select current_schema();
+select * from pg_table_def where schemaname = current_schema() limit 1;
+default schema: public
+
+# users
+select * from pg_user;
+
+####### test sample db
+DROP TABLE public.user;
+CREATE TABLE public.user
+(
+   name varchar(50),
+   password varchar(50)
+);
+
+select * from public.user;
+
+copy public.user from 's3://leo.emr/logs/test.log' 
+credentials 'aws_access_key_id=xxxx;aws_secret_access_key=xxxx' 
+delimiter ',';
+
+select * from public.user;
+
+COMMIT;
+
+#### test ods db
+DROP TABLE ods.user;
+CREATE TABLE ods.user
+(
+   name varchar(50),
+   password varchar(50)
+);
+copy ods.user from 's3://leo.emr/logs/test.log' 
+credentials 'aws_access_key_id=xxx;aws_secret_access_key=xxx' 
+delimiter ',';
+
+select * from ods.user;
+COMMIT;
+
+
+
+# UDF test
+create function f_merge (name varchar, password varchar)
+  returns varchar
+stable
+as $$
+  return name+"+"+password
+$$ language plpythonu;
+
+
+
+
+
+##########
+
+"identity"(100085, 0, '1,1'::text)
+
+DROP TABLE r_appiduid_log_bak CASCADE;
+CREATE TABLE r_appiduid_log_bak
+(
+   id       bigint          DEFAULT "identity"(306025, 0, '1,1'::text),
+   game_id  integer,
+   c_time   timestamp,
+   uid      varchar(50),
+   appid    varchar(50),
+   appuid   varchar(50),
+   ip       varchar(500)
+);
+
+
+CREATE TABLE r_appiduid_log_bak
+(
+   id       bigint      identity(1,1),
+   game_id  integer,
+   c_time   timestamp,
+   uid      varchar(50),
+   appid    varchar(50),
+   appuid   varchar(50),
+   ip       varchar(500)
+);
+
+
+select * from r_appiduid_log_bak;
+copy r_appiduid_log_bak from 's3://leovirgin/ceshi1.txt' 
+credentials 'aws_access_key_id=xxx;aws_secret_access_key=xx' 
+delimiter ',';
+
+insert into r_appiduid_log_bak (game_id) select game_id from r_appiduid_log_bak limit 100;
+
+
+COMMIT;
+
+bucket region: yaoyiyang
+aws_access_key_id = xxxx
+aws_secret_access_key = xxx
+
+
+
+#####
+
+
+DROP TABLE r_appiduid_log_bak CASCADE;
+CREATE TABLE r_appiduid_log_bak
+(
+   id       bigint          DEFAULT "identity"(306025, 0, '1,1'::text),
+   game_id  integer,
+   c_time   timestamp,
+   uid      varchar(50),
+   appid    varchar(50),
+   appuid   varchar(50),
+   ip       varchar(500)
+);
+
+select * from r_appiduid_log_bak;
+
+copy r_appiduid_log_bak from 's3://leovirgin/ceshi1.txt' 
+credentials 'aws_access_key_id=AKIAJAP4EWAEBFBI5COQ;aws_secret_access_key=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' 
+delimiter ',';
+
+select * from r_appiduid_log_bak;
+
+
+insert into r_appiduid_log_bak (game_id) select game_id from r_appiduid_log_bak limit 100;
+
+select * from r_appiduid_log_bak;
+
+
+COMMIT;
+
+
+
+##### 

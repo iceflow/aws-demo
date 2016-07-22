@@ -1,0 +1,68 @@
+
+aws s3 cp shinezone.txt.1 s3://leo.emr/logs/
+
+CREATE  FUNCTION args
+(  val varchar,start varchar  )
+RETURNS varchar
+IMMUTABLE AS $$
+get_args = lambda val, start:filter(lambda x:x.startswith(start), val.split('|'))[0].split(':')[1] if filter(lambda x:x.startswith(start), val.split('|')) else ''
+return get_args(val, start)
+$$ LANGUAGE plpythonu;
+
+CREATE  FUNCTION args
+(  val varchar,start varchar  )
+RETURNS varchar
+IMMUTABLE AS $$
+get_args = lambda val, start:filter(lambda x:x.startswith(start), val.split('|'))[0].split(':')[1] if filter(lambda x:x.startswith(start), val.split('|')) else ''
+return get_args(val, start)
+$$ LANGUAGE plpythonu;
+
+
+CREATE TABLE ods.c_log_live
+(
+   uid      varchar(50),
+   cash     numeric(18),
+   gold     numeric(18),
+   c_level  integer,
+   rtime    varchar(25),
+   tid      varchar(500),
+   act      varchar(100),
+   item     varchar(500),
+   c_value  numeric(18),
+   value2   numeric(18),
+   c_time   timestamp,
+   token    varchar(100),
+   ip       varchar(500),
+   game_id  integer,
+   guid     varchar(100)
+);
+
+100000613304296 121 360526 46 2015-04-16T13:08:12 flash-energy User_definition request 1 0 2016-02-28T00:00:00.0 s_56d1c128b6413 219.71.37.172 29 116777cf-0004-4339-9a19-c813c211c718
+
+100000613304296 121 360526 46 2015-04-16 13:08:12 flash-energy User_definition request 1 0 2016-02-28 00:00:00.0 s_56d1c128b6413 219.71.37.172 29 116777cf-0004-4339-9a19-c813c211c718
+
+# Import data
+copy ods.c_log_live from 's3://leo.emr/logs/shinezone.txt.1'
+credentials 'aws_access_key_id=xxx;aws_secret_access_key=xxx'
+delimiter ',';
+
+
+aws_access_key_id = xxx
+aws_secret_access_key = xxx
+
+select uid,args(tid,'Module'),args(tid,'action')
+from ods.c_log_live
+where c_time >= '2016-02-28'
+and game_id = 18
+and uid='100001608252097'
+and act='userorbit'
+limit 1;
+
+
+select uid,public.args(tid,'Module'),public.args(tid,'action')
+from ods.c_log_live
+where c_time >= '2016-02-28'
+and game_id = 18
+and uid='100001608252097'
+and act='userorbit'
+limit 1;

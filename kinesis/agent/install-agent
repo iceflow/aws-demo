@@ -1,0 +1,120 @@
+#! /usr/bin/env bash
+
+# Make sure only root can run our script
+if [ "$(id -u)" != "0" ]; then
+ echo "This script must be run as root" >&2
+ exit 1
+fi
+
+AGENT_BUCKET=streaming-data-agent
+AGENT_PACKAGE=awsfh-agent
+AGENT_VERSION=latest
+AGENT_KEY=$AGENT_PACKAGE-$AGENT_VERSION.zip
+AGENT_SERVICE_NAME=awsfh-agent
+AGENT_SERVICE=/etc/init.d/$AGENT_SERVICE_NAME
+AGENT_CRON_PATH=/etc/cron.d/awsfh-agent
+AGENT_BABYSIT_SCRIPT=/usr/bin/awsfh-agent-babysit
+BASE_DIR=/var/run
+
+do_uninstall () {
+  BASE_DIR=${1:-$BASE_DIR}
+  AGENT_ROOT=$BASE_DIR/$AGENT_PACKAGE
+
+  if [ ! -d $AGENT_ROOT ];then
+    echo "Kinesis agent not found in $BASE_DIR, uninstallation skipped."
+    return 1
+  fi
+
+  echo "Uninstalling $AGENT_SERVICE_NAME..."
+  # stop the service if it's running
+  if [ -f $AGENT_SERVICE ]; then
+    echo "Stopping $AGENT_SERVICE_NAME..."
+    $AGENT_SERVICE stop
+  fi
+
+  # remove the service from system services
+  chkconfig --list $AGENT_SERVICE_NAME > /dev/null 2>&1
+  if [ $? == 0 ]; then
+    echo "Removing $AGENT_SERVICE_NAME from system services..."
+    sudo chkconfig --del $AGENT_SERVICE_NAME
+  fi
+
+  # remove /etc/init.d/awsfh-agent
+  unlink $AGENT_SERVICE > /dev/null 2>&1
+  
+  # remove cron job
+  unlink $AGENT_BABYSIT_SCRIPT > /dev/null 2>&1
+  rm -f $AGENT_CRON_PATH
+
+  # remove the package
+  rm -rf $AGENT_ROOT
+
+  return 0
+}
+
+do_install () {
+  BASE_DIR=${1:-$BASE_DIR}
+  AGENT_ROOT=$BASE_DIR/$AGENT_PACKAGE
+
+  if [ ! -d $BASE_DIR ]; then
+    echo "$BASE_DIR doesn't exist, creating $BASE_DIR..."
+    mkdir -p $BASE_DIR
+  fi
+
+  # always uninstall old package before installing
+  do_uninstall $BASE_DIR
+
+  echo "Installing Kinesis agent to $BASE_DIR..."
+
+  # download the latest agent package from S3, if not existed
+  if [ ! -f $(dirname $0)/$AGENT_KEY ]; then
+    echo "Downloading $AGENT_KEY from remote repository to $BASE_DIR..."
+    aws s3 cp s3://$AGENT_BUCKET/$AGENT_KEY $BASE_DIR
+    if [ $? -gt 0 ] || [ ! -f $BASE_DIR/$AGENT_KEY ]; then
+      echo "Failed to download $AGENT_KEY, consider contacting AWS Kinesis team and check if you have been whitelisted"
+      exit 1
+    fi
+  else
+    echo "Copying $(dirname $0)/$AGENT_KEY to $BASE_DIR/$AGENT_KEY..."
+    cp $(dirname $0)/$AGENT_KEY $BASE_DIR
+  fi
+
+  echo "Package $AGENT_KEY found, unzipping..."
+  unzip -qo $BASE_DIR/$AGENT_KEY -d $BASE_DIR
+  rm $BASE_DIR/$AGENT_KEY
+
+  if [ ! -d $AGENT_ROOT ]; then
+    echo "Failed to extract $AGENT_KEY in $BASE_DIR"
+    exit 1
+  fi
+
+  ln -s $AGENT_ROOT/etc/init.d/awsfh-agent $AGENT_SERVICE
+
+  $AGENT_SERVICE install
+  /sbin/chkconfig --add awsfh-agent
+  
+  # add a cron job to keep the agent alive
+  ln -s $AGENT_ROOT$AGENT_BABYSIT_SCRIPT $AGENT_BABYSIT_SCRIPT
+  cp $AGENT_ROOT$AGENT_CRON_PATH $AGENT_CRON_PATH
+
+  echo "To make the agent automatically start at system startup, type:"
+  echo "  sudo chkconfig awsfh-agent on"
+  echo ""
+  echo "Your installation has completed!"
+}
+
+COMMAND=$1
+case "$COMMAND" in
+  --uninstall)
+    shift
+    if ! do_uninstall "$@"; then
+      echo "Please check your agent directory."
+      echo "Usage: sudo <script-path>/install-kinesis-agent --uninstall [agent_installation_directory]"
+    else
+      echo "Kinesis agent has been uninstalled"
+    fi
+    ;;
+  *)
+    do_install "$@"
+    ;;
+esac

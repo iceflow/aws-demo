@@ -1,0 +1,306 @@
+{
+    "Roles": [
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com.cn"
+                        }, 
+                        "Effect": "Allow", 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAO3EEDYZCXMWBPMI5E", 
+            "CreateDate": "2015-08-27T12:48:19Z", 
+            "RoleName": "aws-elasticbeanstalk-ec2-role", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/aws-elasticbeanstalk-ec2-role"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "Service": "elasticbeanstalk.amazonaws.com"
+                        }, 
+                        "Effect": "Allow", 
+                        "Condition": {
+                            "StringEquals": {
+                                "sts:ExternalId": "elasticbeanstalk"
+                            }
+                        }, 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAPH6K7MKUQFTNKWYLC", 
+            "CreateDate": "2015-09-10T02:32:30Z", 
+            "RoleName": "aws-elasticbeanstalk-service-role", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/aws-elasticbeanstalk-service-role"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2008-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com.cn"
+                        }, 
+                        "Effect": "Allow", 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAO43ZSP5LPDZKMDKIK", 
+            "CreateDate": "2015-07-26T03:27:43Z", 
+            "RoleName": "AWSCloudFormer-CFNRole-157HZV2XJEEH3", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/AWSCloudFormer-CFNRole-157HZV2XJEEH3"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com.cn"
+                        }, 
+                        "Effect": "Allow", 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAP35LTIGNEJWMAGD7I", 
+            "CreateDate": "2015-05-13T05:47:24Z", 
+            "RoleName": "BatchProcessing", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/BatchProcessing"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Effect": "Allow", 
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com.cn"
+                        }
+                    }
+                ]
+            }, 
+            "RoleId": "AROAPYIQIULKWFVSULKJ2", 
+            "CreateDate": "2016-03-03T08:26:41Z", 
+            "RoleName": "BP1_bastion", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/BP1_bastion"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2008-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "Service": "elasticmapreduce.amazonaws.com.cn"
+                        }, 
+                        "Effect": "Allow", 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAPGGEHRBRL3ZENSXYM", 
+            "CreateDate": "2015-12-03T16:07:27Z", 
+            "RoleName": "EMR_DefaultRole", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/EMR_DefaultRole"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2008-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com.cn"
+                        }, 
+                        "Effect": "Allow", 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAOMTN5I7JL4TH6X7RC", 
+            "CreateDate": "2015-12-03T16:07:27Z", 
+            "RoleName": "EMR_EC2_DefaultRole", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/EMR_EC2_DefaultRole"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "AWS": "arn:aws-cn:iam::356113777010:root"
+                        }, 
+                        "Effect": "Allow", 
+                        "Condition": {
+                            "StringEquals": {
+                                "sts:ExternalId": "8828960C-A787-41FA-AF2F-6AFF0D6ABF4A"
+                            }
+                        }, 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAOFPDYE4B25PNMXZTA", 
+            "CreateDate": "2015-10-30T16:30:35Z", 
+            "RoleName": "IsengardOCRC-002D1F4A-9491-45BE-8717-F1D7F3006CAA", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/IsengardOCRC-002D1F4A-9491-45BE-8717-F1D7F3006CAA"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "AWS": "arn:aws-cn:iam::356113777010:root"
+                        }, 
+                        "Effect": "Allow", 
+                        "Condition": {
+                            "StringEquals": {
+                                "sts:ExternalId": "6F1B4BF7-FB08-43D8-BA3B-E5F565F93F3C"
+                            }
+                        }, 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAP6AD27C56KPVIZYLE", 
+            "CreateDate": "2015-10-30T16:22:18Z", 
+            "RoleName": "IsengardOCRC-C90C6E0F-4884-4647-9F88-0B2FCEC822A8", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/IsengardOCRC-C90C6E0F-4884-4647-9F88-0B2FCEC822A8"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Effect": "Allow", 
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com.cn"
+                        }
+                    }
+                ]
+            }, 
+            "RoleId": "AROAPY46XOSE6EZAQSRPA", 
+            "CreateDate": "2016-01-13T13:34:30Z", 
+            "RoleName": "linuxRole", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/linuxRole"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "Service": "elasticbeanstalk.amazonaws.com"
+                        }, 
+                        "Effect": "Allow", 
+                        "Condition": {
+                            "StringEquals": {
+                                "sts:ExternalId": "elasticbeanstalk"
+                            }
+                        }, 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAPB4B2I4465MWWWBY2", 
+            "CreateDate": "2015-08-27T12:48:19Z", 
+            "RoleName": "test-beanstalk-role", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/test-beanstalk-role"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRoleWithWebIdentity", 
+                        "Principal": {
+                            "Federated": "www.amazon.com"
+                        }, 
+                        "Effect": "Allow", 
+                        "Condition": {
+                            "StringEquals": {
+                                "www.amazon.com:app_id": "abc123"
+                            }
+                        }, 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAOC3AQDDVZCJVPEXNW", 
+            "CreateDate": "2015-05-30T05:00:20Z", 
+            "RoleName": "testRole", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/testRole"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com.cn"
+                        }, 
+                        "Effect": "Allow", 
+                        "Sid": ""
+                    }
+                ]
+            }, 
+            "RoleId": "AROAOY66F2FQYDEWHFO2M", 
+            "CreateDate": "2015-06-24T00:48:06Z", 
+            "RoleName": "TVMRole", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/TVMRole"
+        }, 
+        {
+            "AssumeRolePolicyDocument": {
+                "Version": "2012-10-17", 
+                "Statement": [
+                    {
+                        "Action": "sts:AssumeRole", 
+                        "Effect": "Allow", 
+                        "Principal": {
+                            "Service": "ec2.amazonaws.com.cn"
+                        }
+                    }
+                ]
+            }, 
+            "RoleId": "AROAONLPA3NIM3NHR7OPC", 
+            "CreateDate": "2016-01-09T14:52:25Z", 
+            "RoleName": "winRole", 
+            "Path": "/", 
+            "Arn": "arn:aws-cn:iam::358620020600:role/winRole"
+        }
+    ]
+}
