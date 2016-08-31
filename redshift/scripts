@@ -121,7 +121,7 @@ CREATE TABLE r_appiduid_log_bak
 select * from r_appiduid_log_bak;
 
 copy r_appiduid_log_bak from 's3://leovirgin/ceshi1.txt' 
-credentials 'aws_access_key_id=AKIAJAP4EWAEBFBI5COQ;aws_secret_access_key=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' 
+credentials 'aws_access_key_id=xxx;aws_secret_access_key=xxx' 
 delimiter ',';
 
 select * from r_appiduid_log_bak;

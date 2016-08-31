@@ -1,6 +1,6 @@
 # aws-demo
 - Leo's aws learning scripts 
-- Drop me : lintchen@amazon.com
+- Drop me : chenlintao@gmail.com
 - Start Date: 2015/08/15
 - Testing platform: Amazon Linux AMI release 2015.03
 
