@@ -1,0 +1,36 @@
+{
+	"Version": "2008-10-17",
+	"Statement": [
+		{
+			"Sid": "",
+			"Effect": "Allow",
+			"Principal": {
+				"AWS": "arn:aws-cn:iam::358620020600:user/leo",
+				"AWS": "arn:aws-cn:iam::233509349143:user/lxd"
+			},
+			"Action": "s3:ListBucket",
+			"Resource": "arn:aws-cn:s3:::reinvent"
+		},
+		{
+			"Sid": "",
+			"Effect": "Allow",
+			"Principal": {
+				"AWS": "arn:aws-cn:iam::233509349143:user/lxd"
+			},
+			"Action": [
+				"s3:Get*",
+				"s3:List*"
+			],
+			"Resource": "arn:aws-cn:s3:::reinvent/*"
+		},
+		{
+			"Sid": "",
+			"Effect": "Allow",
+			"Principal": {
+				"AWS": "arn:aws-cn:iam::358620020600:user/leo"
+			},
+			"Action": "s3:*",
+			"Resource": "arn:aws-cn:s3:::reinvent/*"
+		}
+	]
+}
