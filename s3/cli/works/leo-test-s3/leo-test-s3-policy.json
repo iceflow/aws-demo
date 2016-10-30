@@ -1,0 +1,44 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "s3:Get*"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws-cn:s3:::leo-test-s3/*",
+      "Principal": "*",
+	  "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": "0.0.0.0/0"
+        }
+      }
+    },
+    {
+      "Action": [
+        "s3:Get*"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws-cn:s3:::leo-test-s3/*",
+      "Principal": "*",
+	  "Condition": {
+        "StringEquals": {
+           "aws:sourceVpc": "vpc-954f51f7"
+        }
+      }
+    },
+    {
+      "Action": [
+        "s3:Get*"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws-cn:s3:::leo-test-s3/*",
+      "Principal": "*",
+	  "Condition": {
+        "StringEquals": {
+           "aws:sourceVpc": "vpc-954f51f7"
+        }
+      }
+    }
+  ]
+}
