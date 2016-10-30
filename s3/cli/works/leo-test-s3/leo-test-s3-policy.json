@@ -10,7 +10,7 @@
       "Principal": "*",
 	  "Condition": {
         "IpAddress": {
-          "aws:SourceIp": "0.0.0.0/0"
+          "aws:SourceIp": "54.222.123.11/32"
         }
       }
     },
