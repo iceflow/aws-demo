@@ -1,0 +1,25 @@
+
+
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "es:*",
+      "Resource": "arn:aws:es:us-east-1:888250974927:domain/weblog-domain/*",
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": [
+            "29.0.0.0/16",
+            "52.71.0.0/16",
+            "221.177.0.0/16"
+          ]
+        }
+      }
+    }
+  ]
+}
