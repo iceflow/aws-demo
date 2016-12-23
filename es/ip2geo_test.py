@@ -22,3 +22,4 @@ def get_geo_location(host_ip):
 
 
 print get_geo_location('128.101.101.101')
+print get_geo_location('172.16.200.8')
