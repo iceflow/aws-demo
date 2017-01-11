@@ -1,0 +1,41 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "ec2:RunInstances",
+            "Resource": [
+                "arn:aws-cn:ec2:cn-north-1:358620020600:instance/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "ec2:InstanceType": [
+                        "t2.micro",
+                        "t2.small"
+                    ]
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ec2:RunInstances",
+            "Resource": [
+                "arn:aws-cn:ec2:cn-north-1::image/ami-*",
+                "arn:aws-cn:ec2:cn-north-1:358620020600:subnet/*",
+                "arn:aws-cn:ec2:cn-north-1:358620020600:network-interface/*",
+                "arn:aws-cn:ec2:cn-north-1:358620020600:volume/*",
+                "arn:aws-cn:ec2:cn-north-1:358620020600:key-pair/*",
+                "arn:aws-cn:ec2:cn-north-1:358620020600:security-group/*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:Describe*",
+                "iam:Get*",
+                "iam:List*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
