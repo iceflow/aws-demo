@@ -5,7 +5,7 @@
             "Effect": "Allow",
             "Action": "ec2:RunInstances",
             "Resource": [
-                "arn:aws-cn:ec2:cn-north-1:358620020600:instance/*"
+                "arn:aws-cn:ec2:cn-north-1:accountid:instance/*"
             ],
             "Condition": {
                 "StringEquals": {
@@ -21,11 +21,11 @@
             "Action": "ec2:RunInstances",
             "Resource": [
                 "arn:aws-cn:ec2:cn-north-1::image/ami-*",
-                "arn:aws-cn:ec2:cn-north-1:358620020600:subnet/*",
-                "arn:aws-cn:ec2:cn-north-1:358620020600:network-interface/*",
-                "arn:aws-cn:ec2:cn-north-1:358620020600:volume/*",
-                "arn:aws-cn:ec2:cn-north-1:358620020600:key-pair/*",
-                "arn:aws-cn:ec2:cn-north-1:358620020600:security-group/*"
+                "arn:aws-cn:ec2:cn-north-1:accountid:subnet/*",
+                "arn:aws-cn:ec2:cn-north-1:accountid:network-interface/*",
+                "arn:aws-cn:ec2:cn-north-1:accountid:volume/*",
+                "arn:aws-cn:ec2:cn-north-1:accountid:key-pair/*",
+                "arn:aws-cn:ec2:cn-north-1:accountid:security-group/*"
             ]
         },
         {
