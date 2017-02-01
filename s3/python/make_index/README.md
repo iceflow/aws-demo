@@ -1,3 +1,4 @@
+＃ Move to https://github.com/iceflow/s3-static-video-website
 # 简介
 
 由于S3支持H.264，AAC格式自动stream, 特别适合点播，只要网速正常，可以随时在线查看。免去下载。
