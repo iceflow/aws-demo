@@ -8,7 +8,7 @@ S3_ENDPOINT='https://s3.cn-north-1.amazonaws.com.cn'
 
 BUCKET_NAME='reinvent'
 PREFIX='2015/'
-INDEX_FILE='index.html.td'
+INDEX_FILE='index_2015.html.td'
 
 def get_obj_list(bucket_name, prefix):
 
@@ -94,5 +94,5 @@ if __name__ == '__main__':
 	# 2. make up index.html
 	make_up_index_file(BUCKET_NAME, obj_list)
 
-	# 3. Changed related objects permission to public read
-	change_objects_permission(BUCKET_NAME, obj_list)
+	# 3. Changed related objects permission to public read : Using bucket policy
+	# change_objects_permission(BUCKET_NAME, obj_list)
