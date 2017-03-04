@@ -10,7 +10,7 @@ curl -XPUT http://$ES/cf-logs-2017-02-25 -d '
   "mappings": {
     "log": {
       "properties": {
-        "@timestamp": { "type": "date", "format": "yyyy-mm-dd:HH:mm:ss +0000" },
+        "@timestamp": { "type": "date", "format": "yyyy-MM-dd:HH:mm:ss" },
         "x-edge-location": { "type": "string" },
         "sc-bytes": { "type": "integer" },
         "c-ip": { "type": "string" },

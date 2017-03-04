@@ -39,7 +39,7 @@ def process_line(s):
 
     # 数据分段
     data = {}
-    data["@timestamp"] = "%s:%s +0000"%(s[0], s[1]);
+    data["@timestamp"] = "%s:%s"%(s[0], s[1]);
     data["x-edge-location"] = s[2];
     data["sc-bytes"] = int(s[3]);
     data["c-ip"] = s[4];
