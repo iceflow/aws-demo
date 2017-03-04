@@ -34,6 +34,18 @@ def put_data_to_es(host=None, index=None, type=None, doc=None, port=80):
 
     return
 
+def bulk_data_to_es(host=None, body=None, port=80):
+
+    if body is None:
+        return
+
+    es = Elasticsearch([{'host': host, 'port':port}])
+
+    # Bulk action
+    es.bulk(body=body)
+
+    return
+
 # read doc
 #print es.get(index='test-index', doc_type='external', id=1)
 
@@ -53,10 +65,9 @@ if __name__ == '__main__':
 
 
 
-    put_data_to_es('search-weblog-domain-5-fcx4knelxu7dokwfy5okh3rdmy.us-east-1.es.amazonaws.com', 'logstash', 'type1', data)
+    #put_data_to_es('search-weblog-domain-5-fcx4knelxu7dokwfy5okh3rdmy.us-east-1.es.amazonaws.com', 'logstash', 'type1', data)
 
-
-
-
+    body = '{"index":{"_index":"testbulk","_type":"log"}}\n{ "field1" : "value1" }'
+    bulk_data_to_es('search-weblog-domain-5-fcx4knelxu7dokwfy5okh3rdmy.us-east-1.es.amazonaws.com', body)
 
 

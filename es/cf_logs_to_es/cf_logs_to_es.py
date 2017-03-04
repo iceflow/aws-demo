@@ -2,39 +2,33 @@
 # -*- coding: utf8 -*-
 
 import sys
+import json
 from log import *
 from es_put import *
 from ip2geo import *
 
 ### 常量定义
-DUMP_PROCESS_NUM = 1          # 当日志条数累计到DUMP_PROCESS_NUM数量，触发入库
-
-INT_VAL_NUM = 20                # INT64类型数量
-STR_VAL_NUM = 20                # STR类型数量
+DUMP_PROCESS_NUM = 2000          # 当日志条数累计到DUMP_PROCESS_NUM数量，触发入库
 
 INDICES_PREFIX = "cf-logs-"
 DEFAULT_TYPE = "log"
-CF_LOGS_WEB_SIZE = 24
+CF_LOGS_WEB_FORMAT_SIZE = 24
+CF_LOGS_RTMP_FORMAT_SIZE = 13
 
 ################  全局变量 - 开始 ########################################
 #### 日志
 log = Log('CF_LOGS_TO_ES', '/var/log/cf_logs_to_es.log')
-#### 数据库连接
-#uf = unix_conf_file(db_class.default_config_file)
-#cfg = uf.read()
-#db = db_class(cfg=cfg)
-#log_db = db_class(host=cfg['LOGDB_HOST'], port=int(cfg['LOGDB_PORT']), user=cfg['LOGDB_USER'], passwd=cfg['LOGDB_PASS'])
 
 #### 应用数据
 es_server  = None               # ES 服务器
-value_list = []                 # 数据待入库列表
+g_value_body = ""                 # 数据待入库列表
 ################  全局变量 - 结束 ########################################
 
 
 #  //完整网络包格式：总长度(4)+协议ID(2)+protobuf流数据长度(4)+protobuf流数据内容
 def process_line(s):
-    if CF_LOGS_WEB_SIZE != len(s):
-        log.info('日志字段数量不匹配%d: %d(%s)'%(CF_LOGS_WEB_SIZE, len(s), ' '.join(s)))
+    if CF_LOGS_WEB_FORMAT_SIZE != len(s):
+        log.info('日志字段数量不匹配%d: %d(%s)'%(CF_LOGS_WEB_FORMAT_SIZE, len(s), ' '.join(s)))
         return
 
     # 数据分段
@@ -66,7 +60,30 @@ def process_line(s):
     
     #print data
     #put_data_to_es(es_server, '%s%s'%(INDICES_PREFIX, s[0]), DEFAULT_TYPE, data)
-    put_data_to_es(es_server, 'cf-logs-2017-02-25', 'log', data)
+    #put_data_to_es(es_server, 'cf-logs-2017-02-25', 'log', data)
+    global g_value_body
+    g_value_body += '{"index":{"_index":"%s%s","_type":"%s"}}\n%s\n'%(INDICES_PREFIX, s[0], DEFAULT_TYPE, json.dumps(data))
+
+
+def put_data_to_es(filename):
+    ''' def put_data_to_es(filename):
+        批量将数据入库
+    '''
+    global g_value_body
+
+    #print "put_data_to_es: ", filename
+
+    if len(g_value_body) > 0:
+        try:
+            bulk_data_to_es(es_server, g_value_body)
+            #log.debug('数据入库成功:')
+            print "+",
+        except Exception,data:
+            log.debug('数据文件:%s 数据入库失败: Data[%s]'%(filename, g_value_body))
+            print(data)
+
+    # 清空buffer
+    g_value_body = ""
 
 def parse_file(es_server, filename):
     log.debug('开始分析文件:%s'%(filename))
@@ -87,17 +104,27 @@ def parse_file(es_server, filename):
                 #print ("sections[%d]"%len(sections))
 
                 data = process_line(sections)
+
+
+            if ( process_num > DUMP_PROCESS_NUM ):
+                put_data_to_es(filename)
+                process_num = 0
    
 
             total_num += 1
             process_num += 1
 
 
+    ## 分析完毕后，入库剩余数据
+    if process_num > 0:
+        put_data_to_es(filename)
+
+
     log.debug('完成分析文件:%s 数量:%d'%(filename, total_num))
 
 def usage(prog):
-    print "%s usage:"%(prog)
-    print "   %s es_server log_file [log_file] [log_file] ... : 分析日志文件列表"%(prog)
+    print( "%s usage:"%(prog))
+    print("   %s es_server log_file [log_file] [log_file] ... : 分析日志文件列表"%(prog))
 
 if __name__ == '__main__':
 
