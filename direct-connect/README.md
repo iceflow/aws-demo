@@ -1,4 +1,7 @@
 
+# 目标
+监测Direct Connect物理接口(Connection)和虚拟接口(VIF)状态
+
 # 运行方式
 ```Bash
 ./sample.sh [profile_name]
