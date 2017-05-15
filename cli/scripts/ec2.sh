@@ -8,6 +8,9 @@ aws ec2 run-instances --image-id ami-f239abcb --count 1 --instance-type t2.micro
 # 启动内网固定IP,并绑定公网IP(非EIP)
 aws ec2 run-instances --image-id ami-f239abcb --count 1 --instance-type t2.micro --key-name test --security-group-ids sg-0ada386f --subnet-id subnet-13e0c867 --private-ip-address 172.31.16.13 --associate-public-ip-address
 
+# 启动的时候增加EC2/EBS tags
+aws ec2 run-instances --image-id ami-162c2575 --count 1 --instance-type t2.micro --subnet-id subnet-6e7de837 --tag-specifications 'ResourceType=instance,Tags=[{Key=webserver,Value=production}]' 'ResourceType=volume,Tags=[{Key=cost-center,Value=cc123}]'  --region ap-southeast-2
+
 #### 列出EC2实例信息 ####
 # 列出所有instance信息
 aws ec2 describe-instances
@@ -42,4 +45,5 @@ aws ec2 create-network-interface --subnet-id subnet-9d4a7b6c --description "my n
 aws ec2 assign-private-ip-addresses --network-interface-id eni-e5aa89a3 --private-ip-addresses 10.0.0.82
 # 指定私有IP数量
 aws ec2 assign-private-ip-addresses --network-interface-id eni-e5aa89a3 --secondary-private-ip-address-count 2
+
 
