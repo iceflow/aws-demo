@@ -1,0 +1,11 @@
+[
+    {
+      "Classification": "hive-site",
+      "Properties": {
+        "javax.jdo.option.ConnectionURL": "jdbc:mysql:\/\/hostname:3306\/hive?createDatabaseIfNotExist=true",
+        "javax.jdo.option.ConnectionDriverName": "org.mariadb.jdbc.Driver",
+        "javax.jdo.option.ConnectionUserName": "username",
+        "javax.jdo.option.ConnectionPassword": "password"
+      }
+    }
+  ]

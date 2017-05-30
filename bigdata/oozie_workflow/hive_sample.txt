@@ -1,0 +1,501 @@
+data source - http://hadooptutorial.info/wp-content/uploads/2014/12/UserRecords.txt
+
+
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+st hive.exec.max.dynamic.partitions.pernode=1000;
+========================================================
+Enable automated partition for this case 
+
+1. Upload file onto s3 by aws cli 
+==================================================================================================
+[ec2-user@ip-10-1-0-240 emr-data]$ aws s3 cp UserRecords.txt s3://bob-emr-test/input/userrecord/
+upload: ./UserRecords.txt to s3://bob-emr-test/input/userrecord/UserRecords.txt
+[ec2-user@ip-10-1-0-240 emr-data]$
+
+aws emr create-cluster --name "MahoutEMR" --applications Name=Mahout Name=Presto-Sandbox --release-label emr-4.1.0 \
+--use-default-roles --ec2-attributes KeyName=test_ec2_cn,SubnetId=subnet-e6926a83 \
+--instance-type m1.xlarge --instance-count 3
+
+
+2. Create a temp_user table without partition enabled. 
+==================================================================================================
+hive> create external table temp_user(
+     firstname VARCHAR(64),
+     lastname  VARCHAR(64),
+     address   STRING,
+     country   VARCHAR(64),
+     city      VARCHAR(64),
+     state     VARCHAR(64),
+     post      STRING,
+     phone1    VARCHAR(64),
+     phone2    STRING,
+     email     STRING,
+     web       STRING
+     )
+     ROW FORMAT DELIMITED
+     FIELDS TERMINATED BY ','
+     LINES TERMINATED BY '\n'
+     STORED AS TEXTFILE
+     LOCATION 's3://bob-emr-test/input/userrecord/';
+OK
+Time taken: 0.209 seconds
+hive> SELECT firstname, phone1, city
+     FROM temp_user
+     WHERE country='US' AND state='CA'
+     ORDER BY city
+     LIMIT 5;
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1441286577238_0019, Tracking URL = http://10.1.0.29:9046/proxy/application_1441286577238_0019/
+Kill Command = /home/hadoop/bin/hadoop job  -kill job_1441286577238_0019
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2015-10-31 05:52:53,535 Stage-1 map = 0%,  reduce = 0%
+2015-10-31 05:53:01,805 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 3.86 sec
+2015-10-31 05:53:08,003 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.62 sec
+MapReduce Total cumulative CPU time: 5 seconds 620 msec
+Ended Job = job_1441286577238_0019
+MapReduce Jobs Launched:
+Job 0: Map: 1  Reduce: 1   Cumulative CPU: 5.62 sec   HDFS Read: 204 HDFS Write: 157 SUCCESS
+Total MapReduce CPU Time Spent: 5 seconds 620 msec
+OK
+Venita  714-523-6653    Anaheim
+Merissa 562-579-6900    Bellflower
+Joesph  510-677-9785    Berkeley
+Louvenia        310-820-2117    Beverly Hills
+Chau    310-560-8022    Beverly Hills
+
+
+3. Create an partitoned table and then insert data from temp_user.
+==================================================================================================
+hive> CREATE external TABLE partitioned_user(
+     firstname VARCHAR(64),
+     lastname  VARCHAR(64),
+     address   STRING,
+     city      VARCHAR(64),
+     post      STRING,
+     phone1    VARCHAR(64),
+     phone2    STRING,
+     email     STRING,
+     web       STRING
+     )
+     PARTITIONED BY (country VARCHAR(64), state VARCHAR(64))
+     STORED AS SEQUENCEFILE;
+OK
+Time taken: 0.031 seconds
+
+hive> INSERT INTO TABLE partitioned_user
+     PARTITION (country, state)
+     SELECT  firstname ,
+     lastname,
+     address,
+     city,
+     post,
+     phone1,
+     phone2,
+     email,
+     web,
+     country,
+     state
+     FROM temp_user;
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1441286577238_0020, Tracking URL = http://10.1.0.29:9046/proxy/application_1441286577238_0020/
+Kill Command = /home/hadoop/bin/hadoop job  -kill job_1441286577238_0020
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2015-10-31 05:59:04,337 Stage-1 map = 0%,  reduce = 0%
+2015-10-31 05:59:12,754 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.53 sec
+2015-10-31 05:59:23,103 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 9.0 sec
+MapReduce Total cumulative CPU time: 9 seconds 0 msec
+Ended Job = job_1441286577238_0020
+Loading data to table default.partitioned_user partition (country=null, state=null)
+        Loading partition {country=CA, state=PE}
+        Loading partition {country=UK, state=North Yorkshire}
+        Loading partition {country=US, state=ND}
+        Loading partition {country=UK, state=York}
+        Loading partition {country=UK, state=South Gloucestershire}
+        Loading partition {country=US, state=NE}
+        Loading partition {country=UK, state=Clackmannanshire}
+        Loading partition {country=UK, state=Merthyr Tydfil}
+        Loading partition {country=UK, state=Carmarthenshire}
+        Loading partition {country=UK, state=Oxfordshire}
+        Loading partition {country=US, state=CA}
+        Loading partition {country=UK, state=Newport}
+        Loading partition {country=UK, state=West Midlands}
+        Loading partition {country=UK, state=Hampshire}
+        Loading partition {country=UK, state="Yorkshire}
+        Loading partition {country=UK, state=Wiltshire}
+        Loading partition {country=US, state=DC}
+        Loading partition {country=UK, state=North Lanarkshire}
+        Loading partition {country=US, state=VA}
+        Loading partition {country=UK, state=Cambridgeshire}
+        Loading partition {country=UK, state=Brighton and Hove}
+        Loading partition {country=UK, state=Middlesbrough}
+        Loading partition {country=UK, state=Derbyshire}
+        Loading partition {country=UK, state=Cornwall}
+        Loading partition {country=UK, state=Greater Manchester}
+        Loading partition {country=UK, state=Darlington}
+        Loading partition {country=UK, state=Isle of Anglesey}
+        Loading partition {country=UK, state=Devon}
+        Loading partition {country=UK, state=Caerphilly}
+        Loading partition {country=CA, state=MB}
+        Loading partition {country=UK, state=East Dunbartonshire}
+        Loading partition {country=US, state=SC}
+        Loading partition {country=UK, state=Greater London}
+        Loading partition {country=UK, state=Cheshire}
+        Loading partition {country=UK, state=South Ayrshire}
+        Loading partition {country=UK, state=Hereford and Worcester}
+        Loading partition {country=UK, state=Bristol}
+        Loading partition {country=UK, state=Northamptonshire}
+        Loading partition {country=UK, state=Conwy}
+        Loading partition {country=US, state=WI}
+        Loading partition {country=UK, state=City of Edinburgh}
+        Loading partition {country=UK, state=Moray}
+        Loading partition {country=AU, state=AC}
+        Loading partition {country=UK, state=North Somerset}
+        Loading partition {country=CA, state=QC}
+        Loading partition {country=US, state=AK}
+        Loading partition {country=US, state=IN}
+        Loading partition {country=UK, state=East Ayrshire}
+        Loading partition {country=UK, state=Buckinghamshire}
+        Loading partition {country=US, state=RI}
+        Loading partition {country=UK, state=County Durham}
+        Loading partition {country=UK, state=Gloucestershire}
+        Loading partition {country=UK, state=Hertfordshire}
+        Loading partition {country=US, state=MO}
+        Loading partition {country=US, state=NH}
+        Loading partition {country=US, state=WA}
+        Loading partition {country=UK, state=Ceredigion}
+        Loading partition {country=UK, state=Isle of Wight}
+        Loading partition {country=country, state=state}
+        Loading partition {country=US, state=MA}
+        Loading partition {country=UK, state=Stirling}
+        Loading partition {country=CA, state=NL}
+        Loading partition {country=AU, state=TA}
+        Loading partition {country=CA, state=NS}
+        Loading partition {country=US, state=WY}
+        Loading partition {country=US, state=OK}
+        Loading partition {country=CA, state=ON}
+        Loading partition {country=US, state=OH}
+        Loading partition {country=UK, state=Dorset}
+        Loading partition {country=UK, state=Essex}
+        Loading partition {country=US, state=TN}
+        Loading partition {country=UK, state=West Sussex}
+        Loading partition {country=AU, state=NT}
+        Loading partition {country=UK, state=Fife}
+        Loading partition {country=UK, state=Norfolk}
+        Loading partition {country=UK, state=North Lincolnshire}
+        Loading partition {country=UK, state=Nottinghamshire}
+        Loading partition {country=UK, state=West Dunbart}
+        Loading partition {country=UK, state=South Lanarkshire}
+        Loading partition {country=UK, state=East Lothian}
+        Loading partition {country=UK, state=Gwynedd}
+        Loading partition {country=UK, state=Bournemouth}
+        Loading partition {country=UK, state=Aberdeenshire}
+        Loading partition {country=US, state=NC}
+        Loading partition {country=CA, state=NB}
+        Loading partition {country=UK, state=Shropshire}
+        Loading partition {country=UK, state=E Riding of Yorkshire}
+        Loading partition {country=UK, state=Southampton}
+        Loading partition {country=UK, state=Bedfordshire}
+        Loading partition {country=US, state=ME}
+        Loading partition {country=US, state=MI}
+        Loading partition {country=US, state=IL}
+        Loading partition {country=UK, state=Surrey}
+        Loading partition {country=UK, state=Stockton-on-Tees}
+        Loading partition {country=US, state=AR}
+        Loading partition {country=UK, state=Falkirk}
+        Loading partition {country=US, state=CT}
+        Loading partition {country=UK, state=Leicestershire}
+        Loading partition {country=UK, state=East Sussex}
+        Loading partition {country=UK, state=Suffolk}
+        Loading partition {country=US, state=ID}
+        Loading partition {country=UK, state=Vale of Glamorgan}
+        Loading partition {country=US, state=PA}
+        Loading partition {country=US, state=KS}
+        Loading partition {country=UK, state=Somerset}
+        Loading partition {country=UK, state=Rhondda Cynon Taff}
+        Loading partition {country=UK, state=Kent}
+        Loading partition {country=UK, state=Bath Avon}
+        Loading partition {country=US, state=IA}
+        Loading partition {country=UK, state=North Ayrshire}
+        Loading partition {country=US, state=KY}
+        Loading partition {country=UK, state=Flintshire}
+        Loading partition {country=UK, state=Cumbria}
+        Loading partition {country=UK, state=Merseyside}
+        Loading partition {country=US, state=LA}
+        Loading partition {country=UK, state= Uphall and Winchburg"}
+        Loading partition {country=UK, state=Neath Port Talbot}
+        Loading partition {country=US, state=UT}
+        Loading partition {country=UK, state=Leicester}
+        Loading partition {country=US, state=FL}
+        Loading partition {country=UK, state=North Eart Lincolnshire}
+        Loading partition {country=UK, state=Warwickshire}
+        Loading partition {country=US, state=NV}
+        Loading partition {country=UK, state=Inverclyde}
+        Loading partition {country=UK, state=Northumberland}
+        Loading partition {country=UK, state=Tyne and Wear}
+        Loading partition {country=UK, state=Stoke-on-Trent}
+        Loading partition {country=US, state=OR}
+        Loading partition {country=UK, state=Berkshire}
+        Loading partition {country=AU, state=NS}
+        Loading partition {country=US, state=MS}
+        Loading partition {country=UK, state=South Yorkshire}
+        Loading partition {country=UK, state=Lincolnshire}
+        Loading partition {country=UK, state=West Lothian}
+        Loading partition {country=US, state=AZ}
+        Loading partition {country=CA, state=AB}
+        Loading partition {country=UK, state=Denbighshire}
+        Loading partition {country=CA, state=BC}
+        Loading partition {country=UK, state=Dunbartonshire}
+        Loading partition {country=UK, state=Dumfries and Galloway}
+        Loading partition {country=AU, state=VI}
+        Loading partition {country=UK, state= Uplawmoor and Newton"}
+        Loading partition {country=US, state=SD}
+        Loading partition {country=UK, state=Wrexham}
+        Loading partition {country=US, state=GA}
+        Loading partition {country=UK, state=West Yorkshire}
+        Loading partition {country=AU, state=SA}
+        Loading partition {country=AU, state=QL}
+        Loading partition {country=UK, state=Highland}
+        Loading partition {country=US, state=MT}
+        Loading partition {country=US, state=NY}
+        Loading partition {country=AU, state=WA}
+        Loading partition {country=US, state=NJ}
+        Loading partition {country=US, state=MN}
+        Loading partition {country=UK, state=Western Isles}
+        Loading partition {country=UK, state=Glasgow City}
+        Loading partition {country=UK, state=Dundee City}
+        Loading partition {country=UK, state=Perth and Kinross}
+        Loading partition {country=US, state=HI}
+        Loading partition {country=US, state=TX}
+        Loading partition {country=UK, state=Tyne & Wear}
+        Loading partition {country=UK, state=Lancashire}
+        Loading partition {country=US, state=NM}
+        Loading partition {country=US, state=CO}
+        Loading partition {country=US, state=MD}
+        Loading partition {country=UK, state=Staffordshire}
+        Loading partition {country=CA, state=SK}
+Partition default.partitioned_user{country=AU, state=AC} stats: [numFiles=1, numRows=0, totalSize=951, rawDataSize=0]
+Partition default.partitioned_user{country=AU, state=NS} stats: [numFiles=1, numRows=0, totalSize=18603, rawDataSize=0]
+Partition default.partitioned_user{country=AU, state=NT} stats: [numFiles=1, numRows=0, totalSize=1105, rawDataSize=0]
+Partition default.partitioned_user{country=AU, state=QL} stats: [numFiles=1, numRows=0, totalSize=16576, rawDataSize=0]
+Partition default.partitioned_user{country=AU, state=SA} stats: [numFiles=1, numRows=0, totalSize=6719, rawDataSize=0]
+Partition default.partitioned_user{country=AU, state=TA} stats: [numFiles=1, numRows=0, totalSize=4864, rawDataSize=0]
+Partition default.partitioned_user{country=AU, state=VI} stats: [numFiles=1, numRows=0, totalSize=13495, rawDataSize=0]
+Partition default.partitioned_user{country=AU, state=WA} stats: [numFiles=1, numRows=0, totalSize=12296, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=AB} stats: [numFiles=1, numRows=0, totalSize=6191, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=BC} stats: [numFiles=1, numRows=0, totalSize=10413, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=MB} stats: [numFiles=1, numRows=0, totalSize=1814, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=NB} stats: [numFiles=1, numRows=0, totalSize=4444, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=NL} stats: [numFiles=1, numRows=0, totalSize=1193, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=NS} stats: [numFiles=1, numRows=0, totalSize=3399, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=ON} stats: [numFiles=1, numRows=0, totalSize=25318, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=PE} stats: [numFiles=1, numRows=0, totalSize=246, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=QC} stats: [numFiles=1, numRows=0, totalSize=16941, rawDataSize=0]
+Partition default.partitioned_user{country=CA, state=SK} stats: [numFiles=1, numRows=0, totalSize=3080, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state= Uphall and Winchburg"} stats: [numFiles=1, numRows=-1, totalSize=316, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state= Uplawmoor and Newton"} stats: [numFiles=1, numRows=-1, totalSize=211, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state="Yorkshire} stats: [numFiles=1, numRows=-1, totalSize=599, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Aberdeenshire} stats: [numFiles=1, numRows=-1, totalSize=1312, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Bath Avon} stats: [numFiles=1, numRows=-1, totalSize=232, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Bedfordshire} stats: [numFiles=1, numRows=-1, totalSize=227, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Berkshire} stats: [numFiles=1, numRows=-1, totalSize=995, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Bournemouth} stats: [numFiles=1, numRows=-1, totalSize=399, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Brighton and Hove} stats: [numFiles=1, numRows=-1, totalSize=678, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Bristol} stats: [numFiles=1, numRows=0, totalSize=520, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Buckinghamshire} stats: [numFiles=1, numRows=-1, totalSize=972, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Caerphilly} stats: [numFiles=1, numRows=-1, totalSize=238, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Cambridgeshire} stats: [numFiles=1, numRows=-1, totalSize=1115, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Carmarthenshire} stats: [numFiles=1, numRows=-1, totalSize=240, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Ceredigion} stats: [numFiles=1, numRows=-1, totalSize=249, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Cheshire} stats: [numFiles=1, numRows=0, totalSize=715, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=City of Edinburgh} stats: [numFiles=1, numRows=-1, totalSize=548, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Clackmannanshire} stats: [numFiles=1, numRows=-1, totalSize=250, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Conwy} stats: [numFiles=1, numRows=0, totalSize=555, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Cornwall} stats: [numFiles=1, numRows=0, totalSize=2123, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=County Durham} stats: [numFiles=1, numRows=-1, totalSize=1467, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Cumbria} stats: [numFiles=1, numRows=0, totalSize=680, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Darlington} stats: [numFiles=1, numRows=-1, totalSize=234, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Denbighshire} stats: [numFiles=1, numRows=-1, totalSize=412, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Derbyshire} stats: [numFiles=1, numRows=-1, totalSize=1630, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Devon} stats: [numFiles=1, numRows=0, totalSize=2025, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Dorset} stats: [numFiles=1, numRows=0, totalSize=405, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Dumfries and Galloway} stats: [numFiles=1, numRows=-1, totalSize=516, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Dunbartonshire} stats: [numFiles=1, numRows=-1, totalSize=400, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Dundee City} stats: [numFiles=1, numRows=-1, totalSize=234, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=E Riding of Yorkshire} stats: [numFiles=1, numRows=-1, totalSize=409, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=East Ayrshire} stats: [numFiles=1, numRows=-1, totalSize=242, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=East Dunbartonshire} stats: [numFiles=1, numRows=-1, totalSize=253, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=East Lothian} stats: [numFiles=1, numRows=-1, totalSize=246, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=East Sussex} stats: [numFiles=1, numRows=-1, totalSize=808, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Essex} stats: [numFiles=1, numRows=0, totalSize=2100, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Falkirk} stats: [numFiles=1, numRows=0, totalSize=250, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Fife} stats: [numFiles=1, numRows=0, totalSize=381, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Flintshire} stats: [numFiles=1, numRows=-1, totalSize=244, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Glasgow City} stats: [numFiles=1, numRows=-1, totalSize=246, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Gloucestershire} stats: [numFiles=1, numRows=-1, totalSize=973, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Greater London} stats: [numFiles=1, numRows=-1, totalSize=6874, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Greater Manchester} stats: [numFiles=1, numRows=-1, totalSize=3663, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Gwynedd} stats: [numFiles=1, numRows=0, totalSize=401, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Hampshire} stats: [numFiles=1, numRows=-1, totalSize=1314, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Hereford and Worcester} stats: [numFiles=1, numRows=-1, totalSize=942, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Hertfordshire} stats: [numFiles=1, numRows=-1, totalSize=1188, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Highland} stats: [numFiles=1, numRows=0, totalSize=426, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Inverclyde} stats: [numFiles=1, numRows=-1, totalSize=248, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Isle of Anglesey} stats: [numFiles=1, numRows=-1, totalSize=245, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Isle of Wight} stats: [numFiles=1, numRows=-1, totalSize=384, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Kent} stats: [numFiles=1, numRows=0, totalSize=3457, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Lancashire} stats: [numFiles=1, numRows=-1, totalSize=2707, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Leicester} stats: [numFiles=1, numRows=-1, totalSize=248, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Leicestershire} stats: [numFiles=1, numRows=-1, totalSize=560, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Lincolnshire} stats: [numFiles=1, numRows=-1, totalSize=518, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Merseyside} stats: [numFiles=1, numRows=-1, totalSize=1887, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Merthyr Tydfil} stats: [numFiles=1, numRows=-1, totalSize=245, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Middlesbrough} stats: [numFiles=1, numRows=-1, totalSize=231, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Moray} stats: [numFiles=1, numRows=0, totalSize=240, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Neath Port Talbot} stats: [numFiles=1, numRows=-1, totalSize=249, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Newport} stats: [numFiles=1, numRows=0, totalSize=251, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Norfolk} stats: [numFiles=1, numRows=0, totalSize=1010, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=North Ayrshire} stats: [numFiles=1, numRows=-1, totalSize=418, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=North Eart Lincolnshire} stats: [numFiles=1, numRows=-1, totalSize=378, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=North Lanarkshire} stats: [numFiles=1, numRows=-1, totalSize=872, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=North Lincolnshire} stats: [numFiles=1, numRows=-1, totalSize=238, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=North Somerset} stats: [numFiles=1, numRows=-1, totalSize=261, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=North Yorkshire} stats: [numFiles=1, numRows=-1, totalSize=853, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Northamptonshire} stats: [numFiles=1, numRows=-1, totalSize=1285, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Northumberland} stats: [numFiles=1, numRows=-1, totalSize=930, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Nottinghamshire} stats: [numFiles=1, numRows=-1, totalSize=1569, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Oxfordshire} stats: [numFiles=1, numRows=-1, totalSize=416, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Perth and Kinross} stats: [numFiles=1, numRows=-1, totalSize=238, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Rhondda Cynon Taff} stats: [numFiles=1, numRows=-1, totalSize=543, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Shropshire} stats: [numFiles=1, numRows=-1, totalSize=1000, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Somerset} stats: [numFiles=1, numRows=0, totalSize=546, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=South Ayrshire} stats: [numFiles=1, numRows=-1, totalSize=255, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=South Gloucestershire} stats: [numFiles=1, numRows=-1, totalSize=378, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=South Lanarkshire} stats: [numFiles=1, numRows=-1, totalSize=552, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=South Yorkshire} stats: [numFiles=1, numRows=-1, totalSize=1313, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Southampton} stats: [numFiles=1, numRows=-1, totalSize=237, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Staffordshire} stats: [numFiles=1, numRows=-1, totalSize=1403, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Stirling} stats: [numFiles=1, numRows=0, totalSize=593, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Stockton-on-Tees} stats: [numFiles=1, numRows=-1, totalSize=234, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Stoke-on-Trent} stats: [numFiles=1, numRows=-1, totalSize=562, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Suffolk} stats: [numFiles=1, numRows=0, totalSize=659, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Surrey} stats: [numFiles=1, numRows=0, totalSize=2277, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=Tyne & Wear} stats: [numFiles=1, numRows=-1, totalSize=238, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Tyne and Wear} stats: [numFiles=1, numRows=-1, totalSize=1796, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Vale of Glamorgan} stats: [numFiles=1, numRows=-1, totalSize=244, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Warwickshire} stats: [numFiles=1, numRows=-1, totalSize=1275, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=West Dunbart} stats: [numFiles=1, numRows=-1, totalSize=231, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=West Lothian} stats: [numFiles=1, numRows=-1, totalSize=389, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=West Midlands} stats: [numFiles=1, numRows=-1, totalSize=2762, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=West Sussex} stats: [numFiles=1, numRows=-1, totalSize=1670, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=West Yorkshire} stats: [numFiles=1, numRows=-1, totalSize=2260, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Western Isles} stats: [numFiles=1, numRows=-1, totalSize=252, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Wiltshire} stats: [numFiles=1, numRows=-1, totalSize=1223, rawDataSize=-1]
+Partition default.partitioned_user{country=UK, state=Wrexham} stats: [numFiles=1, numRows=0, totalSize=238, rawDataSize=0]
+Partition default.partitioned_user{country=UK, state=York} stats: [numFiles=1, numRows=0, totalSize=243, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=AK} stats: [numFiles=1, numRows=0, totalSize=913, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=AR} stats: [numFiles=1, numRows=0, totalSize=220, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=AZ} stats: [numFiles=1, numRows=0, totalSize=1399, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=CA} stats: [numFiles=1, numRows=0, totalSize=10527, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=CO} stats: [numFiles=1, numRows=0, totalSize=1226, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=CT} stats: [numFiles=1, numRows=0, totalSize=769, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=DC} stats: [numFiles=1, numRows=0, totalSize=230, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=FL} stats: [numFiles=1, numRows=0, totalSize=4061, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=GA} stats: [numFiles=1, numRows=0, totalSize=1059, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=HI} stats: [numFiles=1, numRows=0, totalSize=679, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=IA} stats: [numFiles=1, numRows=0, totalSize=224, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=ID} stats: [numFiles=1, numRows=0, totalSize=641, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=IL} stats: [numFiles=1, numRows=0, totalSize=2207, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=IN} stats: [numFiles=1, numRows=0, totalSize=1376, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=KS} stats: [numFiles=1, numRows=0, totalSize=823, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=KY} stats: [numFiles=1, numRows=0, totalSize=239, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=LA} stats: [numFiles=1, numRows=0, totalSize=1361, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=MA} stats: [numFiles=1, numRows=0, totalSize=1787, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=MD} stats: [numFiles=1, numRows=0, totalSize=2452, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=ME} stats: [numFiles=1, numRows=0, totalSize=511, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=MI} stats: [numFiles=1, numRows=0, totalSize=2091, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=MN} stats: [numFiles=1, numRows=0, totalSize=1072, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=MO} stats: [numFiles=1, numRows=0, totalSize=639, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=MS} stats: [numFiles=1, numRows=0, totalSize=634, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=MT} stats: [numFiles=1, numRows=0, totalSize=236, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=NC} stats: [numFiles=1, numRows=0, totalSize=1228, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=ND} stats: [numFiles=1, numRows=0, totalSize=223, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=NE} stats: [numFiles=1, numRows=0, totalSize=379, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=NH} stats: [numFiles=1, numRows=0, totalSize=225, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=NJ} stats: [numFiles=1, numRows=0, totalSize=7492, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=NM} stats: [numFiles=1, numRows=0, totalSize=380, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=NV} stats: [numFiles=1, numRows=0, totalSize=342, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=NY} stats: [numFiles=1, numRows=0, totalSize=6517, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=OH} stats: [numFiles=1, numRows=0, totalSize=3212, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=OK} stats: [numFiles=1, numRows=0, totalSize=213, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=OR} stats: [numFiles=1, numRows=0, totalSize=905, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=PA} stats: [numFiles=1, numRows=0, totalSize=4259, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=RI} stats: [numFiles=1, numRows=0, totalSize=789, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=SC} stats: [numFiles=1, numRows=0, totalSize=504, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=SD} stats: [numFiles=1, numRows=0, totalSize=231, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=TN} stats: [numFiles=1, numRows=0, totalSize=1470, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=TX} stats: [numFiles=1, numRows=0, totalSize=4631, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=UT} stats: [numFiles=1, numRows=0, totalSize=244, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=VA} stats: [numFiles=1, numRows=0, totalSize=1089, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=WA} stats: [numFiles=1, numRows=0, totalSize=1231, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=WI} stats: [numFiles=1, numRows=0, totalSize=1645, rawDataSize=0]
+Partition default.partitioned_user{country=US, state=WY} stats: [numFiles=1, numRows=0, totalSize=517, rawDataSize=0]
+Partition default.partitioned_user{country=country, state=state} stats: [numFiles=1, numRows=-1, totalSize=162, rawDataSize=-1]
+MapReduce Jobs Launched:
+Job 0: Map: 1  Reduce: 1   Cumulative CPU: 9.0 sec   HDFS Read: 204 HDFS Write: 307680 SUCCESS
+Total MapReduce CPU Time Spent: 9 seconds 0 msec
+OK
+Time taken: 45.535 seconds
+
+4. Query the data from parttioned table  
+hive> SELECT firstname, phone1, city
+     FROM partitioned_user
+     WHERE country='US' AND state='CA'
+     ORDER BY city
+     LIMIT 5;
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1441286577238_0021, Tracking URL = http://10.1.0.29:9046/proxy/application_1441286577238_0021/
+Kill Command = /home/hadoop/bin/hadoop job  -kill job_1441286577238_0021
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2015-10-31 05:59:57,361 Stage-1 map = 0%,  reduce = 0%
+2015-10-31 06:00:04,578 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 1.38 sec
+2015-10-31 06:00:10,767 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 3.06 sec
+MapReduce Total cumulative CPU time: 3 seconds 60 msec
+Ended Job = job_1441286577238_0021
+MapReduce Jobs Launched:
+Job 0: Map: 1  Reduce: 1   Cumulative CPU: 3.06 sec   HDFS Read: 10863 HDFS Write: 157 SUCCESS
+Total MapReduce CPU Time Spent: 3 seconds 60 msec
+OK
+Venita  714-523-6653    Anaheim
+Merissa 562-579-6900    Bellflower
+Joesph  510-677-9785    Berkeley
+Chau    310-560-8022    Beverly Hills
+Louvenia        310-820-2117    Beverly Hills
+Time taken: 21.996 seconds, Fetched: 5 row(s)
+hive>
+
+
