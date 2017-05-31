@@ -102,3 +102,6 @@ mysql> select * from sample_result;
    - RDS mysql 中检查结果
 
 2. 监控[TODO]
+
+# 注意
+1. 实际使用中，请大量修改脚本中的常量定义，还未参数话(TODO)
