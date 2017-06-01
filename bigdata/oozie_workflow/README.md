@@ -2,7 +2,7 @@
 AWS北京区域: [Amzone EMR](http://docs.aws.amazon.com/zh_cn/emr/latest/ManagementGuide/emr-what-is-emr.html) 调度探索: 
  - [EMR steps](http://docs.aws.amazon.com/zh_cn/emr/latest/ManagementGuide/emr-overview.html#emr-work-cluster)
  - [Oozie](http://oozie.apache.org/)
- - [Aireflow](https://airflow.incubator.apache.org/)
+ - [Airflow](https://airflow.incubator.apache.org/)
 
 ## 框架目标完成:
 1. [ ] 使用sqoop, EMR Cluster 从RDS mysql 数据库中抽取数据, 存入S3
@@ -16,7 +16,7 @@ AWS北京区域: [Amzone EMR](http://docs.aws.amazon.com/zh_cn/emr/latest/Manage
     * https://github.com/datacharmer/test_db
  - [X] EMR Steps实现
  - [ ] OOzie实现
- - [ ] Aireflow实现
+ - [ ] Airflow实现
  - [X] [在群集外创建 Hive 元数据仓](http://docs.aws.amazon.com/zh_cn/emr/latest/ReleaseGuide/emr-dev-create-metastore-outside.html)
  - [ ] [BootStraps创建引导操作以安装其他软件](http://docs.aws.amazon.com/zh_cn/emr/latest/DeveloperGuide/emr-plan-bootstrap.html)
  - [X] 定义日常操作流程
@@ -101,7 +101,23 @@ mysql> select * from sample_result;
    - 运行 ./emr_add_steps.sh 提交任务
    - RDS mysql 中检查结果
 
-2. 监控[TODO]
+2. 监控
+ - [查看 Amazon EMR 群集上托管的 Web 界面](http://docs.aws.amazon.com/zh_cn/emr/latest/ManagementGuide/emr-web-interfaces.html)
+   - [使用动态端口转发设置到主节点的 SSH 隧道](http://docs.aws.amazon.com/zh_cn/emr/latest/ManagementGuide/emr-ssh-tunnel.html)
+   - [配置代理设置以查看主节点上托管的网站](http://docs.aws.amazon.com/zh_cn/emr/latest/ManagementGuide/emr-connect-master-node-proxy.html)
+   - 使用控制台访问主节点上的 Web 界面
+```Bash
+接口的名称           URI
+YARN ResourceManager http://master-public-dns-name:8088/ 
+YARN NodeManager     http://slave-public-dns-name:8042/ 
+Hadoop HDFS NameNode http://master-public-dns-name:50070/ 
+Hadoop HDFS DataNode http://slave-public-dns-name:50075/ 
+Spark HistoryServer  http://master-public-dns-name:18080/ 
+Zeppelin             http://master-public-dns-name:8890/ 
+Hue                  http://master-public-dns-name:8888/ 
+Ganglia              http://master-public-dns-name/ganglia/ 
+HBase UI             http://master-public-dns-name:16010/ 
+```
 
 # 注意
 1. 实际使用中，请大量修改脚本中的常量定义，还未参数话(TODO)
