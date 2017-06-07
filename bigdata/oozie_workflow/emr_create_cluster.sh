@@ -7,7 +7,7 @@ aws emr create-cluster --termination-protected --applications  \
 	--release-label emr-5.5.0 \
 	--log-uri 's3n://aws-logs-358620020600-cn-north-1/elasticmapreduce/' \
 	--instance-groups '[{"InstanceCount":1,"InstanceGroupType":"MASTER","InstanceType":"m3.xlarge","Name":"主实例组 - 1"},{"InstanceCount":4,"InstanceGroupType":"CORE","InstanceType":"m3.xlarge","Name":"核心实例组 - 2"}]' \
-	--configurations ./hiveConfiguration.json \
+	--configurations file://hiveConfiguration.json \
 	--service-role EMR_DefaultRole \
 	--enable-debugging \
 	--name 'Demo1-EMR-5.5.0' \
