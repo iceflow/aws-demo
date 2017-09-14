@@ -1,0 +1,20 @@
+{
+  "sourceBucket" : "aws-collections",
+  "destinationBucket" : "arn:aws:s3:::leo-aws-inventory",
+  "version" : "2016-11-30",
+  "fileFormat" : "CSV",
+  "fileSchema" : "Bucket, Key, VersionId, IsLatest, IsDeleteMarker, Size, LastModifiedDate, ETag, StorageClass, IsMultipartUploaded, ReplicationStatus",
+  "files" : [ {
+    "key" : "aws-collections/aws-collections-inventory/data/932e1c8c-2784-4778-9cb7-eab83bfb5b47.csv.gz",
+    "size" : 4740,
+    "MD5checksum" : "1a7791a507448402198120f1dcc8ee96"
+  }, {
+    "key" : "ctripcorp-nephele-file-ireland/test/data/1ae77a57-9a5f-42f5-8157-4fb4b2be78d9.csv.gz",
+    "size" : 20599942,
+    "MD5checksum" : "27241d0ac7db2df515ee27f816127028"
+  }, {
+    "key" : "ctripcorp-nephele-file-ireland/test/data/550abbc2-532b-483f-adbd-92bbdd91752f.csv.gz",
+    "size" : 6017031,
+    "MD5checksum" : "ad7947ce7cb1f62ce30fadec8d2654ec"
+  } ]
+}
