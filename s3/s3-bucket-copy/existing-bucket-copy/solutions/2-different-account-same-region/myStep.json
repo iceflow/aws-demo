@@ -1,0 +1,9 @@
+[
+    {
+        "Name":"S3DistCp step",
+        "Args":["s3-dist-cp","--src=s3://aws-collections/","--dest=s3://aws-collections-ireland-dl-sh/"],
+        "ActionOnFailure":"CONTINUE",
+        "Type":"CUSTOM_JAR",
+        "Jar":"command-runner.jar"        
+    }
+]

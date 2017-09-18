@@ -1,0 +1,9 @@
+[
+    {
+        "Name":"S3DistCp step",
+        "Args":["s3-dist-cp","--src=s3://ctripcorp-nephele-file-eu/","--dest=s3://ireland-leo-test/"],
+        "ActionOnFailure":"CONTINUE",
+        "Type":"CUSTOM_JAR",
+        "Jar":"command-runner.jar"        
+    }
+]
