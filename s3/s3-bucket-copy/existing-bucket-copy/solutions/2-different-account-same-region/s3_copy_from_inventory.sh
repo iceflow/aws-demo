@@ -2,6 +2,8 @@
 
 INVENTORY_BUCKET=joyou-inventory-list
 INVENTORY_DIR=s3://${INVENTORY_BUCKET}/ctripcorp-nephele-file-eu/ctripcore-all/2017-09-19T00-08Z
+QUEUE_ENDPOINT="https://eu-west-1.queue.amazonaws.com/888250974927/inventory-list-queue"
+DST_BUCKET=ireland-leo-test
 
 function get_temp_credential() {
     #arn:aws:iam::064838511194:role/get-s3-inventory-list-role
@@ -49,6 +51,28 @@ function download_inventory_files() {
 
 
 }
+
+
+#cat inventory_files/0022d4cd-3a32-4477-90fb-aee895e8a136.csv.gz
+# SQS
+# aws sqs create-queue --queue-name inventory-list-queue --region eu-west-1
+
+zcat test.csv.gz | while read L; do
+# "ctripcorp-nephele-file-eu","fd/tg/g3/M08/E6/51/CggYG1Y26zCAfj-uAAFPZF8NV_g821.jpg","85860","2017-08-09T07:07:56.000Z","d0655f3673af1ca741b11b29865be8e1","STANDARD","false",""
+
+    SRC_BUCKET=`echo $L|cut -d, -f1|cut -d\" -f2`
+    SRC_KEY=`echo $L|cut -d, -f2|cut -d\" -f2`
+
+    MESSAGE_BODY="${SRC_BUCKET},${SRC_KEY},${DST_BUCKET}"
+
+    aws sqs send-message --queue-url ${QUEUE_ENDPOINT}  --message-body ${MESSAGE_BODY}
+
+
+done
+
+#aws sqs send-message --queue-url ${QUEUE_ENDPOINT}  --message-body "Information about the largest city in Any Region."
+
+exit 0
 
 # Main
 
