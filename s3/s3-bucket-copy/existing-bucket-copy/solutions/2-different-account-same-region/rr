@@ -1,0 +1,9 @@
+#!/bin/bash
+
+
+aws s3 ls s3://ireland-leo-test/fd/tg/g3/M08/E6/51/CggYGlZk_KeAOfnsAAOPrrGOCUA450.jpg
+aws s3 rm s3://ireland-leo-test/fd/tg/g3/M08/E6/51/CggYGlZk_KeAOfnsAAOPrrGOCUA450.jpg
+
+aws s3 ls s3://ireland-leo-test/fd/tg/g3/M08/E9/5D/CggYGlX1LcuAZbpSAAQu0xJ4_F4149.jpg
+aws s3 rm s3://ireland-leo-test/fd/tg/g3/M08/E9/5D/CggYGlX1LcuAZbpSAAQu0xJ4_F4149.jpg
+
