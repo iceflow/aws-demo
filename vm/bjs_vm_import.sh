@@ -2,6 +2,11 @@
 
 # ref:  http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/ApiReference-cmd-ImportInstance.html
 
+# Confirmed : Deprecated 2017/09 Since aws ec2 import-image ... effective 
+
+
+exit 0
+
 
 ACCESS_KEY_ID=xxxxxx
 SECRET_ACCESS_KEY=xxxxxx
@@ -18,3 +23,6 @@ ec2-import-instance -O ${ACCESS_KEY_ID} -W ${SECRET_ACCESS_KEY} -t ${INSTANCE_TY
 
 # 显示转换状态
 ec2-describe-conversion-tasks -O ${ACCESS_KEY_ID} -W ${SECRET_ACCESS_KEY}  --region ${REGION_NAME}
+
+
+# 

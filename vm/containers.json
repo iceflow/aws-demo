@@ -1,10 +1,10 @@
 [
   {
     "Description": "First disk",
-    "Format": "vmdk",
+    "Format": "ova",
     "UserBucket": {
         "S3Bucket": "leo-vm-import",
-        "S3Key": "TestCentOS-disk1.vmdk"
+        "S3Key": "CentOS64.ova"
     }
   }
 ]
