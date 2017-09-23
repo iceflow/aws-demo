@@ -109,9 +109,9 @@ if __name__ == '__main__':
     q_number=int(sys.argv[2])
     dead_queue=sys.argv[3]
 
-    response=check_queue('{0}-{1}'.format(qurl_endpoint, q_number), dead_queue)
-    pprint(response)
-    sys.exit(0)
+    #response=check_queue('{0}-{1}'.format(qurl_endpoint, q_number), dead_queue)
+    #pprint(response)
+    #sys.exit(0)
 
     # Random start point and infinite loop to avoid hot spot scan
     check_point=random.randint(1, q_number)
