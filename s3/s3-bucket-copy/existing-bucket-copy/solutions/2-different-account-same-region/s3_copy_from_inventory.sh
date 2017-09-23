@@ -5,7 +5,7 @@ INVENTORY_BUCKET=joyou-inventory-list
 INVENTORY_DIR=s3://${INVENTORY_BUCKET}/ctripcorp-nephele-file-eu/ctripcore-all/2017-09-19T00-08Z
 QUEUE_ENDPOINT="https://eu-west-1.queue.amazonaws.com/888250974927/s3-copy-list"
 DST_BUCKET=ireland-leo-test
-LOCAL_INVENTORY_DIR=inventory_files_test
+LOCAL_INVENTORY_DIR=inventory_files
 
 # How many SQS to use
 QUEUE_NUM=100

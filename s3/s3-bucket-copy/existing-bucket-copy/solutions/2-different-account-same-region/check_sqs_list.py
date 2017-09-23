@@ -31,22 +31,29 @@ def check_queue_status(qurl):
     #pprint(response)
     #{u'Attributes': {'ApproximateNumberOfMessages': '1',
 
-
+    message_number=0
     if 'Attributes' in response:
         if 'ApproximateNumberOfMessages' in response['Attributes']:
             message_number=int(response['Attributes']['ApproximateNumberOfMessages'])
             if message_number>0:
-                print('%04d : %s'%(message_number, qurl))
+                #print('%04d : %s'%(message_number, qurl))
+                pass
                 
-
-    return
+    return {'number':message_number}
 
 
 if __name__ == '__main__':
     qurl_endpoint=sys.argv[1]
     q_number=int(sys.argv[2])
 
+    total_number=0
     for pos in xrange(q_number):
         response = check_queue_status('{0}-{1}'.format(qurl_endpoint, pos+1))
+
+        total_number+=response['number']
+
+
         
+    print total_number*100
+
     sys.exit(0)
