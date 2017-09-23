@@ -3,4 +3,4 @@
 #aws s3 ls s3://ireland-leo-test/fd/tg/g3/M08/E9/5D/CggYGlX1LcuAZbpSAAQu0xJ4_F4149.jpg
 #aws s3 rm s3://ireland-leo-test/fd/tg/g3/M08/E9/5D/CggYGlX1LcuAZbpSAAQu0xJ4_F4149.jpg
 
-./s3_copy_from_sqs.py https://eu-west-1.queue.amazonaws.com/888250974927/s3-copy-list 100
+./s3_copy_from_sqs.py https://eu-west-1.queue.amazonaws.com/888250974927/s3-copy-list 100 https://eu-west-1.queue.amazonaws.com/888250974927/s3-copy-list-dead-queue

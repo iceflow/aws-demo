@@ -9,6 +9,8 @@ import json
 import gzip
 import random
 
+from inventory_files_to_sqs import *
+
 import boto3
 
 s3 = boto3.resource('s3')
@@ -21,7 +23,7 @@ DST_BUCKET='ireland-leo-test'
 def s3_copy(src_bucket, dst_bucket, key):
     """
     Return Value:
-    Ture:  Copy succesful
+    True:  Copy succesful
     False: Copy failed
     """
     copy_source = {
@@ -38,8 +40,8 @@ def s3_copy(src_bucket, dst_bucket, key):
     return True
 
 
-def check_queue(qurl):
-    print('check_queue(%s)'%(qurl))
+def check_queue(qurl, dead_queue):
+    print('check_queue(%s, %s)'%(qurl, dead_queue))
     #return {'number':0}
 
     response = client.receive_message(
@@ -78,7 +80,10 @@ def check_queue(qurl):
                 print('s3_copy({0}, {1}, {2} ok'.format(src_bucket, dst_bucket, key))
             else:
                 print('s3_copy({0}, {1}, {2} failed'.format(src_bucket, dst_bucket, key))
-                success=False
+                # Just send the failed part to dead queue to verify, and make the job never failed
+                #success=False
+                send_msg_to_sqs(dead_queue, action)
+                success=True
                 break
 
 
@@ -102,17 +107,18 @@ if __name__ == '__main__':
 
     qurl_endpoint=sys.argv[1]
     q_number=int(sys.argv[2])
+    dead_queue=sys.argv[3]
 
-    #response=check_queue('{0}-{1}'.format(qurl_endpoint, q_number))
-    #pprint(response)
-    #sys.exit(0)
+    response=check_queue('{0}-{1}'.format(qurl_endpoint, q_number), dead_queue)
+    pprint(response)
+    sys.exit(0)
 
     # Random start point and infinite loop to avoid hot spot scan
     check_point=random.randint(1, q_number)
     while True:
         if check_point > q_number:
             check_point=1
-        response = check_queue('{0}-{1}'.format(qurl_endpoint, check_point))
+        response = check_queue('{0}-{1}'.format(qurl_endpoint, check_point), dead_queue)
 
         print("Process {} files".format(response['number']))
         check_point+=1

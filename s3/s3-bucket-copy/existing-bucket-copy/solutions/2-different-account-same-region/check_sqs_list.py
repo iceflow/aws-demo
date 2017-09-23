@@ -33,10 +33,11 @@ def check_queue_status(qurl):
 
     message_number=0
     if 'Attributes' in response:
-        if 'ApproximateNumberOfMessages' in response['Attributes']:
+        if 'ApproximateNumberOfMessages' in response['Attributes'] and 'ApproximateNumberOfMessagesNotVisible' in response['Attributes']:
             message_number=int(response['Attributes']['ApproximateNumberOfMessages'])
-            if message_number>0:
-                #print('%04d : %s'%(message_number, qurl))
+            not_visiable_message_number=int(response['Attributes']['ApproximateNumberOfMessagesNotVisible'])
+            if message_number>0 or not_visiable_message_number>0:
+                print('%04d/%04d : %s'%(message_number, not_visiable_message_number, qurl))
                 pass
                 
     return {'number':message_number}
