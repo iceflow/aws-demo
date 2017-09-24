@@ -4,9 +4,15 @@
 # 1. Enable instance SR-IOV
 # 2. Update CentOS and install newest ixgbevf driver
 # 3. Install cloud-init
+#    After install cloud-init ; reboot ; you will need pem to and username 'centos' to login
 # 4. Clear iptable ip6tables
 # 5. reboot confirm
 # 6. Make AMI
+# 7. Partition Change to use full ebs size : http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/storage_expand_partition.html
+#    Mount root volume to another Amazon Linux, and using http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/storage_expand_partition.html#part-resize-gdisk
+#  http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-expand-volume.html#recognize-expanded-volume-linux
+#  e2fsck -f /dev/xvdg1
+#  resize2fs /dev/xvdg1
 
 
 
