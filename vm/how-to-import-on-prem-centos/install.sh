@@ -13,8 +13,10 @@
 #  http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-expand-volume.html#recognize-expanded-volume-linux
 #  e2fsck -f /dev/xvdg1
 #  resize2fs /dev/xvdg1
-
-
+# 8 Make security AMI
+# rm -f /etc/ssh/{ssh_host_dsa_key,ssh_host_dsa_key.pub,ssh_host_key,ssh_host_key.pub,ssh_host_rsa_key,ssh_host_rsa_key.pub}
+# echo > /root/.ssh/authorized_keys ; echo > /home/centos/.ssh/authorized_keys
+# echo >  /etc/udev/rules.d/70-persistent-net.rules
 
 yum update
 
