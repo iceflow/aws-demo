@@ -7,7 +7,10 @@ import sys
 import pprint
 import boto3
 
-client = boto3.client('sqs')
+
+session = boto3.Session(profile_name='joyou@ctrip')
+client = session.client('sqs')
+#client = boto3.client('sqs')
 
 def list_test():
     response = client.list_queues(
@@ -27,7 +30,7 @@ def send_test():
 
 def recv_test():
     response = client.receive_message(
-        QueueUrl='https://sqs.eu-west-1.amazonaws.com/888250974927/s3-copy-list-1',
+        QueueUrl='https://eu-west-1.queue.amazonaws.com/888250974927/s3-copy-list-18',
         MaxNumberOfMessages=10
     )
 
@@ -36,9 +39,9 @@ def recv_test():
 if __name__ == '__main__':
     list_test()
 
-    send_test()
+#    send_test()
 
-    recv_test()
+#    recv_test()
 
     sys.exit(0);
 
