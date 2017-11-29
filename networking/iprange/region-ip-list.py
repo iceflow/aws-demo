@@ -32,7 +32,7 @@ def get_region_ip_ranges(region_name, ip_type):
         if item['region'] in [ region_name ]:
 
             if item.has_key(prefix_dict[ip_type]['ip_prefix']):
-                print item[prefix_dict[ip_type]['ip_prefix']]
+                print(item[prefix_dict[ip_type]['ip_prefix']])
 
 def get_region_list():
     data = None
@@ -73,19 +73,19 @@ if __name__ == '__main__':
 
     #print region_list
 
-    print "=== Current  AWS Region list ==="
+    print("=== Current  AWS Region list ===")
 
     #for item in region_list:
 
     length=len(region_list)
-    for pos in xrange(0, length):
+    for pos in list(range(length)):
         print("{0}) {1}".format(pos, region_list[pos]))
 
     select_id = get_select_item('Select your region id (0~{0}): '.format(length), region_list)
     
     ip_types=['ipv4', 'ipv6']
     length=len(ip_types)
-    for pos in xrange(0, length):
+    for pos in list(range(length)):
         print("{0}) {1}".format(pos, ip_types[pos]))
     ip_type_id = get_select_item('Select ip type '.format(length), ip_types)
 
