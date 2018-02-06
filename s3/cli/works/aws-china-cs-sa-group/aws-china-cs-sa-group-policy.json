@@ -1,0 +1,22 @@
+{
+   "Version":"2012-10-17",
+    "Statement":[
+        {
+            "Sid":"",
+            "Effect":"Allow",
+            "Principal":{
+                "AWS": [
+                    "arn:aws:iam::053173851555:user/renqj"
+                ]
+            },
+            "Action":[
+                "s3:Get*",
+                "s3:List*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::aws-china-cs-sa-group",
+                "arn:aws:s3:::aws-china-cs-sa-group/*"
+            ]
+        }
+    ]
+}
