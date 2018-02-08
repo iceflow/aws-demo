@@ -1,3 +1,10 @@
 
 make_index:
 	生成s3 bucket index.html文件, 视频文件下载链接自动生成　
+
+s3_demo.py
+	生成pre-signed url
+	eg: ./s3_demo.py generate_presigned_url default leoaws public/htsc_ebc_201710.tar 604800 
+    使用 profile default 生成 1个星期的临时下载链接
+
+	

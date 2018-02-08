@@ -47,3 +47,5 @@ aws ec2 assign-private-ip-addresses --network-interface-id eni-e5aa89a3 --privat
 aws ec2 assign-private-ip-addresses --network-interface-id eni-e5aa89a3 --secondary-private-ip-address-count 2
 
 
+## Nat Gateway
+aws ec2 create-route --route-table-id rtb-407f7025 --destination-cidr-block 0.0.0.0/0 --nat-gateway-id nat-012882a0885521702

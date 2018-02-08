@@ -1,6 +1,7 @@
 #!/bin/bash
 
-STREAM_NAME=testagent
+#STREAM_NAME=testagent
+STREAM_NAME=testStream
 
 put_record()
 {
@@ -8,6 +9,7 @@ put_record()
 	aws kinesis put-record --stream-name ${STREAM_NAME} --partition-key $DATA --data $DATA
 }
 
-
-put_record A1
-put_record A2
+while [ 1 ]; do
+	put_record A1 > /dev/null 2>&1
+#	put_record A2
+done

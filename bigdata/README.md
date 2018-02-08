@@ -11,11 +11,18 @@ oozie: 调度
 1. ［x] RDS mysql sample data
     * https://dev.mysql.com/doc/employee/en/
     * https://github.com/datacharmer/test_db
-2. mysql sqoop to s3
+2. [x] mysql sqoop to s3
 3. EMR : Hive -> result to S3
 4. Orchestrated by OOzie  ( Airflow ?? ) 
 5. BootStraps 
 6. User interfaces:  How to easily build daily workflow  
+7. Steps submit
+8. Oozie way
+9. Other better way
 
 # [flowlog-analysis]
 Try to analyze flowlog data and extract top 5 inbount+outbound internal hosts
+
+
+
+s3://cn-north-1.elasticmapreduce/

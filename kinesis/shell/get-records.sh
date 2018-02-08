@@ -1,6 +1,7 @@
 #!/bin/bash
 
-STREAM_NAME=testagent
+#STREAM_NAME=testagent
+STREAM_NAME=testStream
 SHARD_ID="shardId-000000000000"
 #SHARD_ITERATOR_TYPE=AT_SEQUENCE_NUMBER
 #SHARD_ITERATOR_TYPE=AFTER_SEQUENCE_NUMBER
@@ -39,7 +40,7 @@ while [ 1 ]; do
 	get_records
 
 	#echo "Next Iterator: ${SHARD_ITERATOR}"
-
+	exit
 	sleep 5
 done
 

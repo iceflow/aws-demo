@@ -2,10 +2,10 @@
     {
       "Classification": "hive-site",
       "Properties": {
-        "javax.jdo.option.ConnectionURL": "jdbc:mysql:\/\/hostname:3306\/hive?createDatabaseIfNotExist=true",
+        "javax.jdo.option.ConnectionURL": "jdbc:mysql:\/\/poc-public-rds-mysql.cuivkfbunaay.rds.cn-north-1.amazonaws.com.cn:3306\/hive?createDatabaseIfNotExist=true",
         "javax.jdo.option.ConnectionDriverName": "org.mariadb.jdbc.Driver",
-        "javax.jdo.option.ConnectionUserName": "username",
-        "javax.jdo.option.ConnectionPassword": "password"
+        "javax.jdo.option.ConnectionUserName": "admin",
+        "javax.jdo.option.ConnectionPassword": "Leochen81"
       }
     }
   ]

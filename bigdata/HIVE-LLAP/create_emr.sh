@@ -1,6 +1,6 @@
 #!/bin/bash
 
-aws --profile chinakb emr create-cluster --release-label emr-5.7.0 \
+aws --profile chinakb emr create-cluster --release-label emr-5.8.0 \
 --applications Name=Hadoop Name=Hive Name=Hue Name=ZooKeeper Name=Tez  \
 --bootstrap-actions '[{"Path":"s3://awssupportdatasvcs.com/bootstrap-actions/Hive/hive-llap/configure-Hive-LLAP.sh","Name":"Custom action"}]'  \
 --ec2-attributes '{"KeyName":"chinakb-leo","InstanceProfile":"EMR_EC2_DefaultRole","SubnetId":"subnet-402e2634"}' \

@@ -4,11 +4,14 @@
 
 
 # BJS aws -> aws-cn
-aws iam create-role --role-name vmimport --assume-role-policy-document file://trust-policy.json
-aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document file://role-policy.json
-aws ec2 import-image --description "Test" --license-type BYOL --disk-containers file://containers.json
+#aws iam create-role --role-name vmimport --assume-role-policy-document file://trust-policy.json
+#aws iam put-role-policy --role-name vmimport --policy-name vmimport --policy-document file://role-policy.json
+#aws ec2 import-image --description "Test" --license-type BYOL --disk-containers file://containers.json
 
-aws ec2 describe-import-image-tasks --import-task-id import-ami-fgjbyw0g
+# ZHY 
+aws --region cn-northwest-1 ec2 import-image --description "Test" --disk-containers file://containers.json
+
+#aws ec2 describe-import-image-tasks --import-task-id import-ami-fgjbyw0g
 
 #aws ec2 import-image --cli-input-json "{\"Description\": \"ERP linux vhd\",\"DiskContainers\": [ { \"Description\": \"First CLI task\", \"UserBucket\": { \"S3Bucket\":\"leo-vm-import\", \"S3Key\" : \"TestCentOS-disk1.vmdk\" } } ]}"
 
