@@ -6,7 +6,9 @@
             "Effect":"Allow",
             "Principal":{
                 "AWS": [
-                    "arn:aws:iam::053173851555:user/renqj"
+                    "arn:aws:iam::053173851555:user/renqj",
+                    "arn:aws:iam::188869792837:user/soldierxue",
+                    "arn:aws:iam::960874792644:user/david.wang"
                 ]
             },
             "Action":[
