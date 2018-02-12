@@ -1,0 +1,5 @@
+Wrapping Key Spec: RSA_2048
+Wrapping Algorithm: RSAES_OAEP_SHA_1
+Wrapping Key File: wrappingKey_0e40a8a3-b33e-46ee-aea3-6a77c8f8f65c_0212014400
+Import Token File: importToken_0e40a8a3-b33e-46ee-aea3-6a77c8f8f65c_0212014400
+Wrapping Key and Import Token Expiration: Tue 2018-02-13 13:59:43 UTC
