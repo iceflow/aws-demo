@@ -60,3 +60,24 @@ lo        Link encap:Local Loopback
 docker run -it -v /test --rm busybox
 
 
+#### push to ECR cn-northwest-1
+# https://docs.amazonaws.cn/en_us/AmazonECR/latest/userguide/ECR_AWSCLI.html
+`aws ecr get-login --region cn-northwest-1 --no-include-email`
+
+docker login -u AWS -p xxxx  https://358620020600.dkr.ecr.cn-northwest-1.amazonaws.com.cn
+
+# aws ecr create-repository --repository-name helloworld
+{
+    "repository": {
+        "repositoryArn": "arn:aws-cn:ecr:cn-northwest-1:358620020600:repository/hellworld",
+        "registryId": "358620020600",
+        "repositoryName": "hellworld",
+        "repositoryUri": "358620020600.dkr.ecr.cn-northwest-1.amazonaws.com.cn/hellworld",
+        "createdAt": 1549542868.0
+    }
+}
+
+docker tag helloworld:v2 358620020600.dkr.ecr.cn-northwest-1.amazonaws.com.cn/hellworld:v2
+docker tag leoflow/helloworld:v2 358620020600.dkr.ecr.cn-northwest-1.amazonaws.com.cn/hellworld:v2
+
+docker push 358620020600.dkr.ecr.cn-northwest-1.amazonaws.com.cn/hellworld:v2
