@@ -53,3 +53,10 @@ lo        Link encap:Local Loopback
           collisions:0 txqueuelen:1000 
           RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
 
+
+
+## Volume
+#docker run -it -v $PWD:/test --rm busybox
+docker run -it -v /test --rm busybox
+
+
