@@ -62,7 +62,10 @@ docker run -it -v /test --rm busybox
 
 #### push to ECR cn-northwest-1
 # https://docs.amazonaws.cn/en_us/AmazonECR/latest/userguide/ECR_AWSCLI.html
-`aws ecr get-login --region cn-northwest-1 --no-include-email`
+$(aws ecr get-login --region cn-northwest-1 --no-include-email)
+
+## For other accounts
+$(aws ecr get-login --region cn-northwest-1 --registry-ids 937788672844 --no-include-email)
 
 docker login -u AWS -p xxxx  https://358620020600.dkr.ecr.cn-northwest-1.amazonaws.com.cn
 
