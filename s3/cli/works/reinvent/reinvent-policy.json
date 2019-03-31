@@ -6,8 +6,8 @@
             "Effect": "Allow",
             "Principal": {
                 "AWS": [
+                    "arn:aws-cn:iam::358620020600:role/AWSAdmin",
                     "arn:aws-cn:iam::809792444535:user/chinakb",
-					"arn:aws-cn:iam::233509349143:user/lxd",
                     "arn:aws-cn:iam::358620020600:user/leo"
                 ]
             },
