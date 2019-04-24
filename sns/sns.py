@@ -41,7 +41,7 @@ print(json.dumps(data))
 
 
 res = sns_client.publish(
-    TopicArn='arn:aws-cn:sns:cn-north-1:048912060910:AmazonIpSpaceChanged',
+    TopicArn='arn:aws-cn:sns:cn-north-1:048912060910:AmazonIpSpaceChangedTest',
     Message=json.dumps(data),
     MessageStructure='json'
 )
