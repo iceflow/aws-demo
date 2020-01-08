@@ -1,7 +1,7 @@
 # AWS EC2 自动开关机方案(AWS中国区域:北京/宁夏测试通过)
 ## 功能描述
-中国时间每日09:00，开启宁夏，北京区域标签AutoStart==True的EC2
-中国时间每日18:00，关闭宁夏，北京区域标签AutoStop==True的EC2
+- 中国时间每日09:00，开启宁夏，北京区域标签AutoStart==True的EC2
+- 中国时间每日18:00，关闭宁夏，北京区域标签AutoStop==True的EC2
 
 ## 手工操作步骤
  - 1. 宁夏区域，创建lambda函数 auto_ec2_start, python 3.7, 代码使用auto_ec2_start.py内容, Execution role使用auto_ec2_start_role.json内容
