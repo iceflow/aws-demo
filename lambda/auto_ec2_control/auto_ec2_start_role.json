@@ -1,0 +1,29 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws-cn:logs:cn-northwest-1:{AccountID}:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws-cn:logs:cn-northwest-1:{AccountID}:log-group:/aws/lambda/auto_ec2_start:*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:StartInstances",
+                "ec2:Get*",
+                "ec2:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
