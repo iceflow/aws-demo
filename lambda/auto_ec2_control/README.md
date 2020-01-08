@@ -12,6 +12,6 @@
  - 5. 需要自动停止的EC2，增加标签(Key=AutoStop, Value=True)
 
 ## TODO
- [ ] CDK方式发布
- [ ] CloudFormation方式发布
- [ ] 标签自定义操作时间
+ - [ ] CDK方式发布
+ - [ ] CloudFormation方式发布
+ - [ ] 标签自定义操作时间
