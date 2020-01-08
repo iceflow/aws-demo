@@ -3,7 +3,7 @@ import boto3
 regions_name=['cn-northwest-1', 'cn-north-1']
 
 
-def get_snapshot_volues(region_name='cn-northwest-1'):
+def get_snapshot_volumes(region_name='cn-northwest-1'):
     client = boto3.client('ec2', region_name=region_name)
     responses = client.describe_volumes(
         Filters=[
@@ -24,7 +24,7 @@ def get_snapshot_volues(region_name='cn-northwest-1'):
 
 def region_volume_snapshot(region_name='cn-northwest-1'):
     print("Creating volume snapshot in region {}".format(region_name))
-    volumes = get_snapshot_volues(region_name)
+    volumes = get_snapshot_volumes(region_name)
     #create_volume_snapshot
     ec2 = boto3.resource('ec2', region_name=region_name)
     for volume_id in volumes:
