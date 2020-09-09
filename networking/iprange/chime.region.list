@@ -1,0 +1,13 @@
+# Asia Pacific
+ap-northeast-1  # Tokyo
+ap-southeast-1   # Singapore
+
+# North America
+us-east-1	# Virginia
+us-east-2   # Ohio
+us-west-1   # Califonia
+us-west-2	# Oregon
+
+
+## Service 
+EC2, Route53
