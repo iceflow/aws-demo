@@ -8,7 +8,7 @@
                 "AWS": [
                     "arn:aws-cn:iam::358620020600:role/AWSAdmin",
                     "arn:aws-cn:iam::809792444535:user/chinakb",
-                    "arn:aws-cn:iam::358620020600:user/leo"
+                    "arn:aws-cn:iam::048912060910:user/admin"
                 ]
             },
             "Action": "s3:*",
@@ -26,6 +26,10 @@
                 "s3:List*"
             ],
             "Resource": [
+                "arn:aws-cn:s3:::reinvent/index*",
+                "arn:aws-cn:s3:::reinvent/js/*",
+                "arn:aws-cn:s3:::reinvent/css/*",
+                "arn:aws-cn:s3:::reinvent/fonts/*",
                 "arn:aws-cn:s3:::reinvent/2015/*",
                 "arn:aws-cn:s3:::reinvent/2016/*",
                 "arn:aws-cn:s3:::reinvent/2017/*",

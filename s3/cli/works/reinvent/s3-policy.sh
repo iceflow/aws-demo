@@ -5,12 +5,12 @@
 
 
 # Get bucket policy
-aws --profile chinakb s3api get-bucket-policy --bucket reinvent
+aws --profile nwcdlabs s3api get-bucket-policy --bucket reinvent
 
 
 #exit 0
 
 # Pub bucket poicy
-aws --profile chinakb s3api put-bucket-policy --bucket reinvent --policy file://reinvent-policy.json
+aws --profile nwcdlabs s3api put-bucket-policy --bucket reinvent --policy file://reinvent-policy.json
 
-aws --profile chinakb s3api get-bucket-policy --bucket reinvent
+aws --profile nwcdlabs s3api get-bucket-policy --bucket reinvent
