@@ -1,0 +1,10 @@
+#!/bin/bash
+
+
+while [ 1 ]; do
+    aws --profile nwcdlabs s3 mb s3://reinvent --region cn-north-1
+
+   [ $? -eq 0 ] && exit 0
+
+    sleep 30
+done
