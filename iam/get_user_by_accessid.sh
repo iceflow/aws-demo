@@ -1,10 +1,12 @@
 #!/bin/bash
 
-USERS=`aws iam list-users --query 'Users[].UserName' --output text`
-CHECK_KEY=$1
+P=$1
+
+USERS=`aws --profile $P iam list-users --query 'Users[].UserName' --output text`
+CHECK_KEY=$2
 
 for U in $USERS; do
-    ACCESSKEYIDS=`aws iam list-access-keys --user-name $U --query 'AccessKeyMetadata[*].AccessKeyId' --output text`
+    ACCESSKEYIDS=`aws --profile $P iam list-access-keys --user-name $U --query 'AccessKeyMetadata[*].AccessKeyId' --output text`
 
 	echo "Checking user $U..."
 
